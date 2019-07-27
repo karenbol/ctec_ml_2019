@@ -112,6 +112,8 @@ log_sqrt = log10(casas$sqft_living)
 
 plot(y = log_price, x = log_sqrt, main = 'Log - Relación entre Precio y Metros cuadrados', ylab = 'price', xlab = 'sqft_living')
 
+plot(y = casas$price, x = casas$sqft_living, main = 'Relación entre Precio y Metros cuadrados', ylab = 'price', xlab = 'sqft_living')
+
 ```
 
 
