@@ -1,5 +1,7 @@
+#### Programa: Ciencia de los Datos
+#### Curso: Aprendizaje Automático
 
-# Tarea 1
+# Tarea 1 - Karen Bolaños
 
 Siga el siguiente documento y escriba el código en las secciones señaladas.
 
@@ -22,24 +24,16 @@ Con el fin de analizar y tratar de predecir el precio de las casas ubicadas en e
 
 ## Análisis del dataset
 
-Lea el dataset con la función read.csv y guardelo en una variable
-
-Ejemplo:
-
-`casas <- read.csv('kc_house_data.csv', header = T, na.strings = '?')`
+Lea el dataset con la función read.csv y guárdelo en una variable
 
 ```{r}
-# Escriba su código aqui
+casas <- read.csv('kc_house_data.csv', header = T, na.strings = '?')
 ```
 
 Utilice la función summary sobre el dataset
 
-Ejemplo:
-
-`summary(casas)`
-
 ```{r}
-# Escriba su código aqui
+summary(casas)
 ```
 
 ```{r}
@@ -48,34 +42,27 @@ library(caTools)
 
 #Librería de gráficos
 library(ggplot2)
+
 #Evitar mostrar warning messages
-options(warn=-1)
+options(warn = -1)
 ```
 
 Cargue en una variable las columnas 'price' y 'sqft_living'
 
-Ejemplo
-
-`casas <-casas[,c(3,6)]`
-
 ```{r}
-# Escriba su código aqui
+casas <- casas[,c(3,6)]
 ```
 
 Utilice la función summary sobre la nueva variable
 
 ```{r}
-# Escriba su código aqui
+summary(casas)
 ```
 
 Aplique la función de correlación para obtener las correlaciones entre las columnas seleccionadas (price, sqft_living)
 
-Ejemplo:
-
-`cor(casas)`
-
 ```{r}
-# Escriba su código aqui
+cor(casas)
 ```
 
 ### Interpretando los resultados de la correlación
@@ -95,14 +82,12 @@ Ejemplo:
 
 Existen varios métodos para calcular la correlación, la función 'cor' permite especificar el tipo de método mediante el parámetro 'method'
 
-Ejemplo
-
-`cor(casas, method='pearson')`
-
-`cor(casas, method='spearman')`
+```{r}
+cor(casas, method = 'pearson')
+```
 
 ```{r}
-# Escriba su código aqui
+cor(casas, method = 'spearman')
 ```
 
 ### Visualización
@@ -111,12 +96,8 @@ Por último vamos a visualizar los datos del dataset con respecto a las columnas
 
 Con la función plot cree un gráfico de dispersión, asigne la columna 'price' al eje Y y la columna sqft_living al eje X
 
-Ejemplo
-
-`plot(y = casas$price,x = casas$sqft_living, main = 'Relación entre Precio y Metros cuadrados', ylab = 'price', xlab = 'sqft_living')`
-
 ```{r}
-# Escriba su código aqui
+plot(y = casas$price, x = casas$sqft_living, main = 'Relación entre Precio y Metros cuadrados', ylab = 'price', xlab = 'sqft_living')
 ```
 
 ## Conclusiones
