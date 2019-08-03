@@ -20,16 +20,15 @@ library(visdat)
 Comentario: Nunca usar options(warn -1) o supressWarnings()
 
 ```{r}
-casas_df <- read.csv("datos/kc_house_data.csv")
+casas_df <- read.csv("kc_house_data.csv")
 
-read_csv("datos/kc_house_data.csv")
+# read_csv("kc_house_data.csv")
 
-casas <- read_csv("datos/kc_house_data.csv",
+casas <- read_csv("kc_house_data.csv",
                   col_types = cols(
                     .default = col_double(),
-                    id = col_character()
-                  #  date = col_datetime(format = "")
-))
+                    id = col_character(),
+                    date = col_datetime(format = "")))
 ```
 
 
@@ -41,9 +40,9 @@ ggpairs(casas)
 
 Como podemos hacer esto mas rapido? Que si tenemos 3 millones de filas?
 
-
-
 ```{r}
+# usamos muestreo para no graficar todos los datos
+# sacamos el id del dataset
 ggpairs(casas %>% 
           select( -id) %>% 
           sample_n(1000))
@@ -67,8 +66,17 @@ boxplot(casas$price)
 
 ```{r}
 hist(casas$price)
+```
+
+```{r}
 qqnorm(casas$price)
+```
+
+```{r}
 qqline(casas$price)
+```
+
+```{r}
 densidad <- density(casas$price)
 plot(densidad)
 ```
@@ -100,11 +108,12 @@ plot(casas$price ~ softmax_price)
 
 ### Logaritmos
 
-naturual
+natural
 
 ```{r}
 ln_price <- log(casas$price)
 plot(casas$price ~ ln_price)
+#plot(ln_price)
 ```
 
 base 10

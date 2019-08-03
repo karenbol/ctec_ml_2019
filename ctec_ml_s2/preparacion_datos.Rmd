@@ -1,13 +1,16 @@
 ---
 title: "Preparación de los datos"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# 
+### Tarea #2
+### Elaborada por: Karen Bolaños Alfaro
 
 # Breve introducción a ggpairs
 
@@ -34,12 +37,16 @@ La función `is.na` nos permite detectar los valores faltantes en un dataset.
 
 El siguiente código muestra el número de elementos faltantes en todo un dataset
 
-`sum(is.na(dataset))`
-
+```{r}
+sum(is.na(casas))
+```
 
 También podemos buscar valores faltantes en columnas especificas
 
-`sum(is.na(dataset$columna))`
+``
+```{r}
+sum(is.na(casas$view))
+```
 
 
 R posee funciones para modificar dataframes las cuales podemos aprovechar para el tratamiento de valores faltantes y transformaciones
@@ -67,32 +74,40 @@ Como podemos observar la columna bathrooms posee valores inconsistentes ya que n
 Modifique la columna bathrooms para que solo posea valores enteros
 
 ```{r}
-# Escriba su código aqui
+# metodo floor redondea hacia abajo
+casas$bathrooms <- floor(casas$bathrooms)
+casas$bathrooms[1:10]
 ```
 
 ### 2. Llevar los datos a distribución normal.
 
-Modifique la columna price del dataset de precios de casas para que siga una distribución normal. Pista: utilice la función `log10`
+Modifique la columna `price` del dataset de precios de casas para que siga una distribución normal. Pista: utilice la función `log10`
 
 ```{r}
 # Precios antes de la modificación
-hist(casas$price)
-# Escriba su codigo aqui
-# ...
+hist(casas$price, main = "Distribucion de Precios antes de aplicar log10")
+
+casas$price <- log10(casas$price)
+
 # Precios normalmente distribuidos
-hist(casas$price)
+hist(casas$price, main = "Distribucion de Precios luego de aplicar log10")
+
+# Como se ve ahora el valor de los precios?
+casas$price[1:10]
 ```
 
 Note que ahora los precios ya no se agrupan a la izquierda.
 
 ### 3. Imputar datos faltantes
 
-Reemplace los valores faltantes de la columna sqft_living con la mediana de los valores de esa columna. Pista use la función `median`.
+Reemplace los valores faltantes de la columna `sqft_living` con la mediana de los valores de esa columna. Pista use la función `median`.
 
 Nota: este dataset no posee valores faltantes pero para efectos del ejercicio esto no nos afecta ya que el código sería igual.
 
 ```{r}
-# Escriba su código aqui
+sqft_living_median = median(casas$sqft_living)
+
+casas$sqft_living[is.na(casas$sqft_living)] <- sqft_living_median
 ```
 
 
@@ -109,31 +124,67 @@ feature_scaling <- function(x) {
 }
 ```
 
-1. Utilice la función `feature_scaling` para escalar los valores de la columna sqft_lot
+1. Utilice la función `feature_scaling` para escalar los valores de la columna `sqft_lot`
 2. Compare el resultado con la función `scale()`
 
 ```{r}
-# Escriba su código aqui
+casas$sqft_lot <- feature_scaling(casas$sqft_lot)
+resultado_scale <- scale(casas$sqft_lot)
+
+# Las funciones feature_scaling y scale dan resultados diferentes porque aplican cálculos matematicos diferentes.
+# scale por ejemplo centra los valores restandole a cada uno el promedio de los datos, y los escala dividiendo lo valores centrados entre su desviacion estandar.
 ```
 
 ### 5. Normalización con la función z-score
 
-Otra función utilizada para transformar atributos se llama z-score y consiste en restar la media de los datos y dividir por la desviación estandar.
+Otra función utilizada para transformar atributos se llama `z-score` y consiste en restar la media de los datos y dividir por la desviación estandar.
 
-Escriba la función z_score y utilicela sobre la columna bathrooms. 
+Escriba la función `z_score` y utilicela sobre la columna bathrooms. 
 
 Pista: utilice las funciones `mean`, `sd`
 
 ```{r}
+b_mean = mean(casas$bathrooms)
+```
+
+```{r}
+b_sd = sd(casas$bathrooms)
+```
+
+```{r}
+(4 - b_mean) / b_sd
+```
+
+
+```{r}
+#funcion z_score
+z_score = function(x){
+  data_mean = mean(x)
+  data_sd = sd(x)
+  
+  result = (x - data_mean) / data_sd
+  return(result)
+}
+```
+
+```{r}
 # Datos antes de la transformación
-hist(casas$bathrooms)
-# Escriba su código aqui
-# ...
+hist(casas$bathrooms, main = "Antes de aplicar Z-score")
+
+casas$bathrooms = z_score(casas$bathrooms)
+
 # Después de la transformación
-hist(casas$bathrooms)
+hist(casas$bathrooms, main = "Luego de aplicar Z-score")
 ```
 
 Note que ahora la media de los datos se acerca a 0
+
+
+
+```{r}
+# cual es la media del set de datos ahora?
+mean(casas$bathrooms)
+```
 
 
 

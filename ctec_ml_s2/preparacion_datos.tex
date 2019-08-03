@@ -1,0 +1,441 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Preparación de los datos},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Preparación de los datos}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{}
+    \preauthor{}\postauthor{}
+    \date{}
+    \predate{}\postdate{}
+  
+
+\begin{document}
+\maketitle
+
+\hypertarget{breve-introduccion-a-ggpairs}{%
+\section{Breve introducción a
+ggpairs}\label{breve-introduccion-a-ggpairs}}
+
+\texttt{ggpairs()} es una función de la librería GGally que permite
+crear matrices de gráficos y es realmente útil en la etapa de análisis y
+exploración de los datos. Pueden encontrar más información sobre
+\texttt{ggpairs()} y GGally en el siguiente enlace
+\url{https://ggobi.github.io/ggally/\#ggally}
+
+El siguiente ejemplo muestra el gráfico de las correlaciones y
+densidades de algunos atributos del dataset de ventas de casas.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(GGally)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: ggplot2
+\end{verbatim}
+
+\begin{verbatim}
+## Registered S3 method overwritten by 'GGally':
+##   method from   
+##   +.gg   ggplot2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggplot2)}
+
+\NormalTok{casas <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{'kc_house_data.csv'}\NormalTok{, }\DataTypeTok{header =}\NormalTok{ T, }\DataTypeTok{na.strings =} \StringTok{'?'}\NormalTok{)}
+\KeywordTok{ggpairs}\NormalTok{(casas, }\DataTypeTok{columns =} \DecValTok{3}\OperatorTok{:}\DecValTok{7}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{preparacion_datos_files/figure-latex/unnamed-chunk-1-1.pdf}
+
+\hypertarget{limpieza-y-transformacion-de-los-datos}{%
+\section{Limpieza y transformación de los
+datos}\label{limpieza-y-transformacion-de-los-datos}}
+
+A continuación utilizando el dataset de venta de casas veremos algunas
+funcionalidades de R para la transformación de datos.
+
+\hypertarget{deteccion-de-valores-faltantes-y-transformaciones}{%
+\subsubsection{Detección de valores faltantes y
+transformaciones}\label{deteccion-de-valores-faltantes-y-transformaciones}}
+
+La función \texttt{is.na} nos permite detectar los valores faltantes en
+un dataset.
+
+El siguiente código muestra el número de elementos faltantes en todo un
+dataset
+
+\texttt{sum(is.na(dataset))}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(casas))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+También podemos buscar valores faltantes en columnas especificas
+
+``
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(casas}\OperatorTok{$}\NormalTok{view))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+R posee funciones para modificar dataframes las cuales podemos
+aprovechar para el tratamiento de valores faltantes y transformaciones
+
+Podemos asignar valores nuevos a toda una columna.
+
+\texttt{dataframe\$columna\ \textless{}-\ 0}
+
+\texttt{dataframe\$columna\ \textless{}-\ funcion(dataframe\$columna)}
+
+O podemos hacerlo solo en los campos faltantes.
+
+\texttt{dataframe\$columna{[}is.na(dataframe\$columna){]}\ \textless{}-\ 0}
+
+\texttt{dataframe\$columna{[}is.na(dataframe\$columna){]}\ \textless{}-\ funcion(dataframe\$columna)}
+
+\hypertarget{ejercicios-sobre-transformaciones}{%
+\section{Ejercicios sobre
+transformaciones}\label{ejercicios-sobre-transformaciones}}
+
+\hypertarget{correcion-de-valores-inconsistentes}{%
+\subsubsection{1. Correción de valores
+inconsistentes}\label{correcion-de-valores-inconsistentes}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{casas}\OperatorTok{$}\NormalTok{bathrooms[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] 2.25 1.00 4.50 1.50 1.00 1.75 2.00 3.00 2.00 1.75
+\end{verbatim}
+
+Como podemos observar la columna bathrooms posee valores inconsistentes
+ya que no tiene sentido que una casa tenga 4.5 baños.
+
+Modifique la columna bathrooms para que solo posea valores enteros
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Escriba su código aqui}
+\CommentTok{# metodo floor redondea hacia abajo}
+\NormalTok{casas}\OperatorTok{$}\NormalTok{bathrooms <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(casas}\OperatorTok{$}\NormalTok{bathrooms)}
+\NormalTok{casas}\OperatorTok{$}\NormalTok{bathrooms[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] 2 1 4 1 1 1 2 3 2 1
+\end{verbatim}
+
+\hypertarget{llevar-los-datos-a-distribucion-normal.}{%
+\subsubsection{2. Llevar los datos a distribución
+normal.}\label{llevar-los-datos-a-distribucion-normal.}}
+
+Modifique la columna price del dataset de precios de casas para que siga
+una distribución normal. Pista: utilice la función \texttt{log10}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Precios antes de la modificación}
+\KeywordTok{hist}\NormalTok{(casas}\OperatorTok{$}\NormalTok{price, }\DataTypeTok{main =} \StringTok{"Distribucion de Precios antes de aplicar log10"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{preparacion_datos_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Escriba su codigo aqui}
+\NormalTok{casas}\OperatorTok{$}\NormalTok{price <-}\StringTok{ }\KeywordTok{log10}\NormalTok{(casas}\OperatorTok{$}\NormalTok{price)}
+\CommentTok{# Precios normalmente distribuidos}
+\KeywordTok{hist}\NormalTok{(casas}\OperatorTok{$}\NormalTok{price, }\DataTypeTok{main =} \StringTok{"Distribucion de Precios luego de aplicar log10"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{preparacion_datos_files/figure-latex/unnamed-chunk-6-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Como se ve ahora el valor de los precios?}
+\NormalTok{casas}\OperatorTok{$}\NormalTok{price[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] 5.730782 5.255273 6.088136 5.465160 5.491362 5.602060 5.724276
+##  [8] 5.812913 5.596597 5.585461
+\end{verbatim}
+
+Note que ahora los precios ya no se agrupan a la izquierda.
+
+\hypertarget{imputar-datos-faltantes}{%
+\subsubsection{3. Imputar datos
+faltantes}\label{imputar-datos-faltantes}}
+
+Reemplace los valores faltantes de la columna sqft\_living con la
+mediana de los valores de esa columna. Pista use la función
+\texttt{median}.
+
+Nota: este dataset no posee valores faltantes pero para efectos del
+ejercicio esto no nos afecta ya que el código sería igual.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sqft_living_median =}\StringTok{ }\KeywordTok{median}\NormalTok{(casas}\OperatorTok{$}\NormalTok{sqft_living)}
+
+\NormalTok{casas}\OperatorTok{$}\NormalTok{sqft_living[}\KeywordTok{is.na}\NormalTok{(casas}\OperatorTok{$}\NormalTok{sqft_living)] <-}\StringTok{ }\NormalTok{sqft_living_median}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{escalado}{%
+\subsubsection{4. Escalado}\label{escalado}}
+
+Un proceso común en esta etapa es escalar los atributos para que los
+valores queden en el rango de 0-1.
+
+La siguiente función realiza el escalado de valores
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{feature_scaling <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) \{}
+\NormalTok{  x_escalado <-}\StringTok{ }\NormalTok{((x }\OperatorTok{-}\StringTok{ }\KeywordTok{min}\NormalTok{(x)) }\OperatorTok{/}\StringTok{ }\NormalTok{(}\KeywordTok{max}\NormalTok{(x) }\OperatorTok{-}\StringTok{ }\KeywordTok{min}\NormalTok{(x)))}
+  \KeywordTok{return}\NormalTok{(x_escalado)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Utilice la función \texttt{feature\_scaling} para escalar los valores
+  de la columna sqft\_lot
+\item
+  Compare el resultado con la función \texttt{scale()}
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{casas}\OperatorTok{$}\NormalTok{sqft_lot <-}\StringTok{ }\KeywordTok{feature_scaling}\NormalTok{(casas}\OperatorTok{$}\NormalTok{sqft_lot)}
+\NormalTok{resultado_scale <-}\StringTok{ }\KeywordTok{scale}\NormalTok{(casas}\OperatorTok{$}\NormalTok{sqft_lot)}
+
+\CommentTok{# Las funciones feature_scaling y scale dan resultados diferentes porque aplican cálculos matematicos diferentes.}
+\CommentTok{# scale por ejemplo centra los valores restandole a cada uno el promedio de los datos, y los escala dividiendo lo valores centrados}
+\CommentTok{# entre su desviacion estandar.}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{normalizacion-con-la-funcion-z-score}{%
+\subsubsection{5. Normalización con la función
+z-score}\label{normalizacion-con-la-funcion-z-score}}
+
+Otra función utilizada para transformar atributos se llama z-score y
+consiste en restar la media de los datos y dividir por la desviación
+estandar.
+
+Escriba la función z\_score y utilicela sobre la columna bathrooms.
+
+Pista: utilice las funciones \texttt{mean}, \texttt{sd}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{b_mean =}\StringTok{ }\KeywordTok{mean}\NormalTok{(casas}\OperatorTok{$}\NormalTok{bathrooms)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{b_sd =}\StringTok{ }\KeywordTok{sd}\NormalTok{(casas}\OperatorTok{$}\NormalTok{bathrooms)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(}\DecValTok{4} \OperatorTok{-}\StringTok{ }\NormalTok{b_mean) }\OperatorTok{/}\StringTok{ }\NormalTok{b_sd}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3.125862
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#funcion z_score}
+\NormalTok{z_score =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x)\{}
+\NormalTok{  data_mean =}\StringTok{ }\KeywordTok{mean}\NormalTok{(x)}
+\NormalTok{  data_sd =}\StringTok{ }\KeywordTok{sd}\NormalTok{(x)}
+  
+\NormalTok{  result =}\StringTok{ }\NormalTok{(x }\OperatorTok{-}\StringTok{ }\NormalTok{data_mean) }\OperatorTok{/}\StringTok{ }\NormalTok{data_sd}
+  \KeywordTok{return}\NormalTok{(result)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Datos antes de la transformación}
+\KeywordTok{hist}\NormalTok{(casas}\OperatorTok{$}\NormalTok{bathrooms, }\DataTypeTok{main =} \StringTok{"Antes de aplicar Z-score"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{preparacion_datos_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{casas}\OperatorTok{$}\NormalTok{bathrooms =}\StringTok{ }\KeywordTok{z_score}\NormalTok{(casas}\OperatorTok{$}\NormalTok{bathrooms)}
+
+\CommentTok{# Después de la transformación}
+\KeywordTok{hist}\NormalTok{(casas}\OperatorTok{$}\NormalTok{bathrooms, }\DataTypeTok{main =} \StringTok{"Luego de aplicar Z-score"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{preparacion_datos_files/figure-latex/unnamed-chunk-14-2.pdf}
+
+Note que ahora la media de los datos se acerca a 0
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# cual es la media del set de datos ahora?}
+\KeywordTok{mean}\NormalTok{(casas}\OperatorTok{$}\NormalTok{bathrooms)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3.647762e-17
+\end{verbatim}
+
+
+\end{document}
