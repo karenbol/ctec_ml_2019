@@ -144,19 +144,6 @@ Escriba la función `z_score` y utilicela sobre la columna bathrooms.
 Pista: utilice las funciones `mean`, `sd`
 
 ```{r}
-b_mean = mean(casas$bathrooms)
-```
-
-```{r}
-b_sd = sd(casas$bathrooms)
-```
-
-```{r}
-(4 - b_mean) / b_sd
-```
-
-
-```{r}
 #funcion z_score
 z_score = function(x){
   data_mean = mean(x)
@@ -178,8 +165,6 @@ hist(casas$bathrooms, main = "Luego de aplicar Z-score")
 ```
 
 Note que ahora la media de los datos se acerca a 0
-
-
 
 ```{r}
 # cual es la media del set de datos ahora?

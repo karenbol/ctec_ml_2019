@@ -482,10 +482,6 @@ resultado_scale &lt;- scale(casas$sqft_lot)
 <p>Otra función utilizada para transformar atributos se llama <code>z-score</code> y consiste en restar la media de los datos y dividir por la desviación estandar.</p>
 <p>Escriba la función <code>z_score</code> y utilicela sobre la columna bathrooms.</p>
 <p>Pista: utilice las funciones <code>mean</code>, <code>sd</code></p>
-<pre class="r"><code>b_mean = mean(casas$bathrooms)</code></pre>
-<pre class="r"><code>b_sd = sd(casas$bathrooms)</code></pre>
-<pre class="r"><code>(4 - b_mean) / b_sd</code></pre>
-<pre><code>## [1] 3.125862</code></pre>
 <pre class="r"><code>#funcion z_score
 z_score = function(x){
   data_mean = mean(x)

@@ -100,6 +100,30 @@ Con la función plot cree un gráfico de dispersión, asigne la columna 'price' 
 plot(y = casas$price, x = casas$sqft_living, main = 'Relación entre Precio y Metros cuadrados', ylab = 'price', xlab = 'sqft_living')
 ```
 
+
+```{r}
+
+# importante ver los histogramas para cada variable, si no tienen distribucion normal, entonces aplicarle log, es una opcion.
+
+# en el grafico vemos que los datos aun se dispersan un poco, pero ya es menos.
+
+log_price = log10(casas$price)
+log_sqrt = log10(casas$sqft_living)
+
+plot(y = log_price, x = log_sqrt, main = 'Log - Relación entre Precio y Metros cuadrados', ylab = 'price', xlab = 'sqft_living')
+
+```
+
+
+```{r}
+# luego de la tilde estamos diciendo, predecir price, con las variables a la derecha.
+mod <- lm(log(casas$price) ~ log(casas$sqft_living) , data = casas)
+# este mod solito lo puedo usar en la consola y ver los valores.
+
+plot(mod)
+```
+
+
 ## Conclusiones
 
 Como se puede observar tanto en la gráfica como en las correlaciones, existe una tendencia clara en el aumento del precio de las viviendas con respecto a los metros cuadrados. Con este pequeño análisis de los datos podemos elegir las variables predictoras y el modelo inicial, en este caso podemos elegir utilizar una regresión lineal simple utilizando la columna 'sqft_living' como variable predictora.
