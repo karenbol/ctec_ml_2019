@@ -1,0 +1,1038 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Regresion},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Regresion}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{}
+    \preauthor{}\postauthor{}
+    \date{}
+    \predate{}\postdate{}
+  
+
+\begin{document}
+\maketitle
+
+\hypertarget{tarea-3.}{%
+\section{Tarea 3.}\label{tarea-3.}}
+
+\hypertarget{completada-por-karen-bolanos-alfaro}{%
+\section{Completada por: Karen Bolaños
+Alfaro}\label{completada-por-karen-bolanos-alfaro}}
+
+\hypertarget{regresion-lineal}{%
+\section{Regresión lineal}\label{regresion-lineal}}
+
+Análisis del Problema
+
+El desempeño de un automóvil se puede medir de diferentes formas.
+Algunas comunes son la cantidad de caballos de fuerza y el rendimiento
+del mismo, que se puede resumir en cuantas millas puede recorrer el
+automóvil por cada galón de combustible que consume. Para los clientes,
+potenciales compradores de un automóvil, este rendimiento es importante
+pues puede ayudar a tomar una decisión con respecto a cuál automóvil
+comprar (si, por ejemplo, el cliente quiere un auto que rinda por muchas
+millas y pueda economizar en la compra de combustible).
+
+Desde este punto de vista, tanto a clientes como a fabricadores de
+automóviles, les conviene entender cuál es la relación entre diferentes
+características del automóvil y su rendimiento, pues el conocer estas
+relaciones les puede ayudar a inferir cuál va a ser la eficiencia del
+vehículo a partir de ver los valores de otras características. Para
+fabricantes, puede ser importante conocer estas relaciones para saber
+cómo hacer cada modelo más eficiente con respecto al anterior.
+
+Entendimiento de los Datos
+
+Con el fin de analizar y tratar de estimar las millas por galón de
+diferentes modelos de automóviles, se trabajó con un conjunto de datos
+que contiene 398 observaciones y 9 variables:
+
+\begin{itemize}
+\tightlist
+\item
+  mpg (millas por galón): numérica, con un rango de 9 a 46.60.
+\item
+  cyl (cilindraje): categórica ordinal, con valores posibles de 3, 4, 5,
+  6 y 8.
+\item
+  disp (desplazamiento): numérica, con un rango de 68 a 455.
+\item
+  hp (caballos de fuerza): numérica, con un rango de 46 a 230 y 6
+  valores faltantes.
+\item
+  weight (peso): numérica, con un rango de 1613 a 5140.
+\item
+  acc (aceleración): numérica, con un rango de 8 a 24.80.
+\item
+  model year (año): categórica, con 13 valores diferentes representando
+  el año del automóvil.
+\item
+  origin (origen): categórica, 3 valores posibles: 1, 2, 3.
+\item
+  model name (nombre del modelo): categórica, con 305 posibles valores.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(readr)}
+\KeywordTok{library}\NormalTok{(GGally)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: ggplot2
+\end{verbatim}
+
+\begin{verbatim}
+## Registered S3 method overwritten by 'GGally':
+##   method from   
+##   +.gg   ggplot2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(caTools)}
+\KeywordTok{library}\NormalTok{(lessR)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## lessR 3.8.8     feedback: gerbing@pdx.edu     web: lessRstats.com/new
+## ---------------------------------------------------------------------
+## 1. d <- Read("")           Read text, Excel, SPSS, SAS or R data file
+##                            d: default data frame, no need for data=
+## 2. l <- Read("", var_labels=TRUE)   Read variable labels into l,
+##                            required name for data frame of labels
+## 3. Help()                  Get help, and, e.g., Help(Read)
+## 4. hs(), bc(), or ca()     All histograms, all bar charts, or both
+## 5. Plot(X) or Plot(X,Y)    For continuous and categorical variables
+## 6. by1= , by2=             Trellis graphics, a plot for each by1, by2
+## 7. reg(Y ~ X, Rmd="eg")    Regression with full interpretative output
+## 8. style("gray")           Grayscale theme, + many others available
+##    style(show=TRUE)        all color/style options and current values
+## 9. getColors()             create many styles of color palettes
+## 
+## lessR parameter names now use _'s. Names with a period are deprecated.
+## Ex:  bin_width  instead of  bin.width
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(visdat)}
+\KeywordTok{library}\NormalTok{(dplyr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'dplyr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:GGally':
+## 
+##     nasa
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+\end{verbatim}
+
+\hypertarget{ejercicios}{%
+\section{Ejercicios}\label{ejercicios}}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Cargue el archivo auto-mpg\_g.csv en una variable
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{autos <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{'auto-mpg_g.csv'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Utilizando Ggpairs cree un gráfico de los atributos del dataset,
+  observe las correlaciones entre atributos Hagamos un ggpairs con todas
+  las variables del dataset. Para generar este grafico no se grafica la
+  variable model.name porque supera la cardinalidad permitida de 15.
+  Como es categorica no nos aporta valor y no la vamos a graficar.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggpairs}\NormalTok{(autos[}\OperatorTok{-}\DecValTok{9}\NormalTok{], }\DataTypeTok{progress =}\NormalTok{ F)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-3-1.pdf}
+Como se puede observar, tenemos varias variables categoricas que para
+aplicar regresion lineal, no nos van a aportar mucho valor, por ejemplo:
+origin, cyl, model.year, model.name
+
+Hagamos un ggpair de nuevo pero sin esas variables categoricas: cyl,
+model.year, model.name y origin Se observa que solo la variable acc
+presenta una distribucion masomenos normal.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggpairs}\NormalTok{(autos[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{7}\NormalTok{,}\DecValTok{8}\NormalTok{,}\DecValTok{9}\NormalTok{)], }\DataTypeTok{progress =}\NormalTok{ F)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+Un vistazo rapido a las estadisticas de las variables del set de datos.
+IMPORTANTE: no tenemos valores faltantes como NA, pero los tenemos en 0
+para la columna hp, hay que hacer algo con ellos probemos con
+eliminarlos a ver que pasa, si no los eliminamos o tratamos, no podemos
+aplicar log sobre ellos.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(autos)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       mpg             cyl             disp             hp       
+##  Min.   : 9.00   Min.   :3.000   Min.   : 68.0   Min.   :  0.0  
+##  1st Qu.:18.00   1st Qu.:4.000   1st Qu.:104.2   1st Qu.: 75.0  
+##  Median :23.00   Median :4.000   Median :148.5   Median : 92.0  
+##  Mean   :23.56   Mean   :5.455   Mean   :193.4   Mean   :102.9  
+##  3rd Qu.:29.00   3rd Qu.:8.000   3rd Qu.:262.0   3rd Qu.:125.0  
+##  Max.   :47.00   Max.   :8.000   Max.   :455.0   Max.   :230.0  
+##                                                                 
+##      weight          acc          model.year        origin     
+##  Min.   :1613   Min.   : 8.00   Min.   :70.00   Min.   :1.000  
+##  1st Qu.:2224   1st Qu.:14.00   1st Qu.:73.00   1st Qu.:1.000  
+##  Median :2804   Median :16.00   Median :76.00   Median :1.000  
+##  Mean   :2970   Mean   :15.71   Mean   :76.01   Mean   :1.573  
+##  3rd Qu.:3608   3rd Qu.:17.00   3rd Qu.:79.00   3rd Qu.:2.000  
+##  Max.   :5140   Max.   :25.00   Max.   :82.00   Max.   :3.000  
+##                                                                
+##            model.name 
+##   ford pinto    :  6  
+##   amc matador   :  5  
+##   ford maverick :  5  
+##   toyota corolla:  5  
+##   amc gremlin   :  4  
+##   amc hornet    :  4  
+##  (Other)        :369
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  Separe los datos en 2 conjuntos, uno de entrenamiento y otro de
+  pruebas. Normalmente se trabaja utilizando un 70-80\% de los datos
+  para entrenamiento y el resto para pruebas.
+\end{enumerate}
+
+Recuerde fijar una semilla para que el documento sea reproducible.
+
+Pista:
+\url{https://www.rdocumentation.org/packages/caTools/versions/1.17.1/topics/sample.split}
+
+Voy a crear un dataset nuevo basado en el anterior donde elimino las
+variables categoricas porque no me aportan valor y me dan problema en
+los calculos y voy a eliminar las filas que tienen hp en 0.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{autos_}\DecValTok{2}\NormalTok{ <-}\StringTok{ }\NormalTok{autos }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{select}\NormalTok{(mpg,disp,hp,weight,acc) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{filter}\NormalTok{(hp }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Veamos los tipos de datos y si falta alguno en el nuevo set de datos -
+Observamos que todos los datos que tenemos son de tipo integer y que no
+tenemos NA.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{vis_dat}\NormalTok{(autos_}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# no tenemos valores faltantes en el training set}
+\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(autos_}\DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+Voy a repartir el 80\% de los datos al set de training y el 20\% al de
+pruebas
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{17}\NormalTok{)}
+\NormalTok{data_split <-}\StringTok{ }\KeywordTok{sample.split}\NormalTok{(autos_}\DecValTok{2}\NormalTok{, }\DataTypeTok{SplitRatio =} \FloatTok{0.8}\NormalTok{)}
+
+\NormalTok{training_set =}\StringTok{ }\KeywordTok{subset}\NormalTok{(autos_}\DecValTok{2}\NormalTok{, data_split }\OperatorTok{==}\StringTok{ }\OtherTok{TRUE}\NormalTok{)}
+\NormalTok{test_set  =}\StringTok{ }\KeywordTok{subset}\NormalTok{(autos_}\DecValTok{2}\NormalTok{, data_split }\OperatorTok{==}\StringTok{ }\OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Histograma de las variables del training set
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{hist}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{mpg)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{density}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{mpg), }\DataTypeTok{main =} \StringTok{"Density Plot: mpg"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Frequency"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-9-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{hist}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{disp)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{density}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{disp), }\DataTypeTok{main =} \StringTok{"Density Plot: disp"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Frequency"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-10-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{hist}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{hp)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{density}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{hp), }\DataTypeTok{main =} \StringTok{"Density Plot: hp"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Frequency"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-11-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{hist}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{weight)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{density}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{weight), }\DataTypeTok{main =} \StringTok{"Density Plot: weight"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Frequency"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-12-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{hist}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{acc)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{density}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{acc), }\DataTypeTok{main =} \StringTok{"Density Plot: acc"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Frequency"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-13-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# boxplot de todo el set de training}
+\KeywordTok{boxplot}\NormalTok{(training_set)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# tenemos outliers en HP}
+\KeywordTok{boxplot}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{hp)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-14-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# tenemos outliers en acc}
+\KeywordTok{boxplot}\NormalTok{(training_set}\OperatorTok{$}\NormalTok{acc)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-14-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{scatter.smooth}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ training_set}\OperatorTok{$}\NormalTok{hp, }\DataTypeTok{y =}\NormalTok{ training_set}\OperatorTok{$}\NormalTok{mpg, }\DataTypeTok{main =} \StringTok{"MPG ~ HP"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-15-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{scatter.smooth}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ training_set}\OperatorTok{$}\NormalTok{disp, }\DataTypeTok{y =}\NormalTok{ training_set}\OperatorTok{$}\NormalTok{mpg, }\DataTypeTok{main =} \StringTok{"MPG ~ Disp"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Regresion_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  Cree un modelo de regresion lineal utilizando el atributo mpg como la
+  variable objetivo y en base a las correlaciones observadas en el
+  gráfico del punto 2 escoja al menos dos atributos para usarlos como
+  variables predictoras para el modelo.
+\end{enumerate}
+
+Pista:
+\url{https://www.rdocumentation.org/packages/lessR/versions/1.9.8/topics/reg}
+
+Nota: Al crear el modelo utilice el conjunto de datos de entrenamiento
+definido en el punto 3.
+
+Para esta paso mis variables predictoras del modelo seran: disp y hp
+
+Aplicamos la formula con las variables predictoras en la regresion
+lineal.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# reg(mpg ~ hp + disp, data = training_set)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{hagamos-regresion-lineal-con-el-comando-lm}{%
+\subsection{hagamos regresion lineal con el comando
+lm}\label{hagamos-regresion-lineal-con-el-comando-lm}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{linear_reg =}\StringTok{ }\KeywordTok{lm}\NormalTok{(mpg }\OperatorTok{~}\StringTok{ }\NormalTok{hp }\OperatorTok{+}\StringTok{ }\NormalTok{disp, }\DataTypeTok{data =}\NormalTok{ training_set)}
+\KeywordTok{print}\NormalTok{(linear_reg)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = mpg ~ hp + disp, data = training_set)
+## 
+## Coefficients:
+## (Intercept)           hp         disp  
+##    37.42699     -0.05122     -0.04357
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(linear_reg)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = mpg ~ hp + disp, data = training_set)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -11.767  -3.196  -0.488   2.531  16.650 
+## 
+## Coefficients:
+##              Estimate Std. Error t value             Pr(>|t|)
+## (Intercept) 37.426987   0.840073  44.552 < 0.0000000000000002
+## hp          -0.051222   0.015803  -3.241              0.00132
+## disp        -0.043573   0.005798  -7.515    0.000000000000617
+## 
+## Residual standard error: 4.653 on 310 degrees of freedom
+## Multiple R-squared:  0.6597, Adjusted R-squared:  0.6575 
+## F-statistic: 300.4 on 2 and 310 DF,  p-value: < 0.00000000000000022
+\end{verbatim}
+
+Hagamos ahora la preduccion del modelo
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predict_results <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(linear_reg,  test_set)}
+\NormalTok{preds_comparison <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{actuals =}\NormalTok{ test_set}\OperatorTok{$}\NormalTok{mpg, }
+                                  \DataTypeTok{predicteds =}\NormalTok{ predict_results))}
+\NormalTok{preds_comparison}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##     actuals predicteds
+## 2        15  13.724904
+## 7        14   6.376134
+## 12       14  14.416741
+## 17       18  23.787483
+## 22       24  28.154743
+## 27       10  13.805786
+## 32       25  27.637198
+## 37       18  22.195911
+## 42       12  11.518674
+## 47       19  21.411599
+## 52       30  29.699731
+## 57       24  27.637198
+## 62       13  13.724904
+## 67       11   8.080116
+## 72       15  16.497582
+## 77       22  28.261824
+## 82       23  27.229744
+## 87       13  14.749335
+## 92       13  14.039882
+## 97       18  22.244814
+## 102      26  30.844221
+## 107      18  22.195911
+## 112      19  27.757257
+## 117      29  31.954171
+## 122      24  26.520291
+## 127      15  21.411599
+## 132      16  21.411599
+## 137      14  15.887561
+## 142      26  29.205131
+## 147      26  28.530910
+## 152      18  21.155491
+## 157      16  15.887561
+## 162      18  22.757030
+## 167      23  27.075387
+## 172      24  27.273317
+## 177      23  27.690738
+## 182      25  28.223581
+## 187      16  15.887561
+## 192      24  24.563455
+## 197      33  30.747108
+## 202      30  29.563682
+## 207      13  15.887561
+## 212      13  14.749335
+## 217      36  31.013875
+## 222      16  16.143669
+## 227      19  21.514042
+## 232      29  29.205131
+## 237      34  28.905450
+## 242      22  28.306781
+## 247      36  30.388557
+## 252      21  23.846353
+## 257      21  21.983376
+## 262      18  18.910083
+## 267      27  27.273317
+## 272      24  27.273317
+## 277      32  29.912266
+## 282      20  22.708127
+## 287      18  16.655885
+## 292      32  29.912266
+## 297      23  15.773767
+## 302      32  30.393887
+## 307      34  26.237534
+## 312      28  26.237534
+## 317      30  26.978274
+## 322      28  25.251346
+## 327      30  27.633495
+## 332      24  29.254726
+## 337      26  25.917226
+## 342      35  30.824286
+## 347      35  29.624871
+## 352      32  28.879494
+## 357      25  24.165034
+## 362      18  23.269245
+## 367      29  27.242031
+## 372      31  29.978784
+## 377      34  29.135601
+## 382      38  21.657047
+## 387      27  26.237534
+## 392      31  28.041641
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{4}
+\tightlist
+\item
+  Realice predicciones utilizando el conjunto de pruebas y evalue el
+  resultado con la métrica MSE.
+\end{enumerate}
+
+Pista:
+\url{https://www.rdocumentation.org/packages/mltools/versions/0.3.5/topics/mse}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#library(Metrics)}
+\KeywordTok{library}\NormalTok{(mltools)}
+
+\CommentTok{# voy a predecir el error basada en mi nuevo dataframe preds_comparison}
+\KeywordTok{mse}\NormalTok{(}\DataTypeTok{preds =}\NormalTok{ preds_comparison}\OperatorTok{$}\NormalTok{predicteds, }\DataTypeTok{actuals =}\NormalTok{ preds_comparison}\OperatorTok{$}\NormalTok{actuals)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 16.66146
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# aqui con log tenia 14.38}
+\end{Highlighting}
+\end{Shaded}
+
+Obtenemos un MSE de 16.66146, sin aplicar ningun tratamiendo a las
+variables predictoras ni a la independiente.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{5}
+\tightlist
+\item
+  Opcional
+\end{enumerate}
+
+6.a Pruebe varios modelos que utilicen diferentes variables y comparar
+los resultados obtenidos
+
+6.b Investigar como implementar en R las técnicas de preprocesado y
+normalización vistas en clase y aplicarlas a los datos antes de pasarlos
+al modelo.
+
+\hypertarget{prueba-1-probando-con-hp-y-disp-aplicando-log-natural}{%
+\section{Prueba 1: probando con hp y disp aplicando log
+natural}\label{prueba-1-probando-con-hp-y-disp-aplicando-log-natural}}
+
+El error ha bajado con respecto a la primera prueba sin aplicar log,
+ahora tenemos el MSE en: 15.65637
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{linear_reg2 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\KeywordTok{log}\NormalTok{(mpg) }\OperatorTok{~}\StringTok{ }\KeywordTok{log}\NormalTok{(hp) }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(disp), }\DataTypeTok{data =}\NormalTok{ training_set)}
+
+\CommentTok{# calcular predicciones}
+\NormalTok{results2 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(linear_reg2,  test_set)}
+\NormalTok{predicted_}\DecValTok{2}\NormalTok{ <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{actuals =}\NormalTok{ test_set}\OperatorTok{$}\NormalTok{mpg, }
+                                  \DataTypeTok{predicteds =} \KeywordTok{exp}\NormalTok{(results2)))}
+
+\CommentTok{# calculo del error}
+\KeywordTok{mse}\NormalTok{(}\DataTypeTok{preds =}\NormalTok{ predicted_}\DecValTok{2}\OperatorTok{$}\NormalTok{predicteds, }\DataTypeTok{actuals =}\NormalTok{ predicted_}\DecValTok{2}\OperatorTok{$}\NormalTok{actuals)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 15.65637
+\end{verbatim}
+
+\hypertarget{prueba-2-probando-con-weight-y-acc-en-su-estado-natural}{%
+\section{Prueba 2: probando con weight y acc en su estado
+natural}\label{prueba-2-probando-con-weight-y-acc-en-su-estado-natural}}
+
+El error ha bajado con respecto a la ultima prueba, ahora tenemos el MSE
+en: 15.03812
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# aplicar modelo}
+\NormalTok{linear_reg3 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(mpg }\OperatorTok{~}\StringTok{ }\NormalTok{weight }\OperatorTok{+}\StringTok{ }\NormalTok{acc, }\DataTypeTok{data =}\NormalTok{ training_set)}
+
+\CommentTok{# calcular predicciones}
+\NormalTok{results3 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(linear_reg3,  test_set)}
+\NormalTok{predicted_}\DecValTok{3}\NormalTok{ <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{actuals =}\NormalTok{ test_set}\OperatorTok{$}\NormalTok{mpg, }
+                                  \DataTypeTok{predicteds =}\NormalTok{ results3))}
+
+\CommentTok{# calculo del error}
+\KeywordTok{mse}\NormalTok{(}\DataTypeTok{preds =}\NormalTok{ predicted_}\DecValTok{3}\OperatorTok{$}\NormalTok{predicteds, }\DataTypeTok{actuals =}\NormalTok{ predicted_}\DecValTok{3}\OperatorTok{$}\NormalTok{actuals)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 15.03812
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# aumenta el error usando weight con acc}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{prueba-3probando-con-weight-y-acc-con-log}{%
+\section{Prueba 3:probando con weight y acc con
+log}\label{prueba-3probando-con-weight-y-acc-con-log}}
+
+Aumenta el MSE: 16.32081
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# aplicar modelo}
+\NormalTok{linear_reg4 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\KeywordTok{log}\NormalTok{(mpg) }\OperatorTok{~}\StringTok{ }\KeywordTok{log}\NormalTok{(weight) }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(acc), }\DataTypeTok{data =}\NormalTok{ training_set)}
+
+\CommentTok{# calcular predicciones}
+\NormalTok{results4 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(linear_reg4,  test_set)}
+\NormalTok{predicted_}\DecValTok{4}\NormalTok{ <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{actuals =}\NormalTok{ test_set}\OperatorTok{$}\NormalTok{mpg, }
+                                  \DataTypeTok{predicteds =} \KeywordTok{exp}\NormalTok{(results4)))}
+
+\CommentTok{# calculo del error}
+\KeywordTok{mse}\NormalTok{(}\DataTypeTok{preds =}\NormalTok{ predicted_}\DecValTok{4}\OperatorTok{$}\NormalTok{predicteds, }\DataTypeTok{actuals =}\NormalTok{ predicted_}\DecValTok{4}\OperatorTok{$}\NormalTok{actuals)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 16.32081
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# disminuye el error usando weight con acc con log}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{prueba-4-probando-con-disp-y-weight-en-su-estado-natural}{%
+\section{Prueba \#4: probando con disp y weight en su estado
+natural}\label{prueba-4-probando-con-disp-y-weight-en-su-estado-natural}}
+
+MSE: 15.50007
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# aplicar modelo}
+\NormalTok{linear_reg5 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(mpg }\OperatorTok{~}\StringTok{ }\NormalTok{disp }\OperatorTok{+}\StringTok{ }\NormalTok{weight, }\DataTypeTok{data =}\NormalTok{ training_set)}
+
+\CommentTok{# calcular predicciones}
+\NormalTok{results5 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(linear_reg5,  test_set)}
+\NormalTok{predicted_}\DecValTok{5}\NormalTok{ <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{actuals =}\NormalTok{ test_set}\OperatorTok{$}\NormalTok{mpg, }
+                                  \DataTypeTok{predicteds =}\NormalTok{ results5))}
+\CommentTok{# calculo del error}
+\KeywordTok{mse}\NormalTok{(}\DataTypeTok{preds =}\NormalTok{ predicted_}\DecValTok{5}\OperatorTok{$}\NormalTok{predicteds, }\DataTypeTok{actuals =}\NormalTok{ predicted_}\DecValTok{5}\OperatorTok{$}\NormalTok{actuals)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 15.50007
+\end{verbatim}
+
+\hypertarget{prueba-5-probando-con-disp-y-weight-con-log}{%
+\section{Prueba \#5: probando con disp y weight con
+log}\label{prueba-5-probando-con-disp-y-weight-con-log}}
+
+El MSE ha aumentado a 16.86141
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# aplicar modelo}
+\NormalTok{linear_reg6 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\KeywordTok{log}\NormalTok{(mpg) }\OperatorTok{~}\StringTok{ }\KeywordTok{log}\NormalTok{(disp) }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(weight), }\DataTypeTok{data =}\NormalTok{ training_set)}
+
+\CommentTok{# calcular predicciones}
+\NormalTok{results6 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(linear_reg6,  test_set)}
+\NormalTok{predicted_}\DecValTok{6}\NormalTok{ <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{actuals =}\NormalTok{ test_set}\OperatorTok{$}\NormalTok{mpg, }
+                                  \DataTypeTok{predicteds =} \KeywordTok{exp}\NormalTok{(results6)))}
+
+\CommentTok{# calculo del error}
+\KeywordTok{mse}\NormalTok{(}\DataTypeTok{preds =}\NormalTok{ predicted_}\DecValTok{6}\OperatorTok{$}\NormalTok{predicteds, }\DataTypeTok{actuals =}\NormalTok{ predicted_}\DecValTok{6}\OperatorTok{$}\NormalTok{actuals)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 16.86141
+\end{verbatim}
+
+\hypertarget{prueba-6-probando-con-acc-y-hp-con-log}{%
+\section{Prueba \#6: probando con acc y hp con
+log}\label{prueba-6-probando-con-acc-y-hp-con-log}}
+
+MSE aumento a 18.55948
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# aplicar modelo}
+\NormalTok{linear_reg7 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\KeywordTok{log}\NormalTok{(mpg) }\OperatorTok{~}\StringTok{ }\KeywordTok{log}\NormalTok{(acc) }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(hp), }\DataTypeTok{data =}\NormalTok{ training_set)}
+
+\CommentTok{# calcular predicciones}
+\NormalTok{results7 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(linear_reg7,  test_set)}
+\NormalTok{predicted_}\DecValTok{7}\NormalTok{ <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{actuals =}\NormalTok{ test_set}\OperatorTok{$}\NormalTok{mpg, }
+                                  \DataTypeTok{predicteds =} \KeywordTok{exp}\NormalTok{(results7)))}
+
+\CommentTok{# calculo del error}
+\KeywordTok{mse}\NormalTok{(}\DataTypeTok{preds =}\NormalTok{ predicted_}\DecValTok{7}\OperatorTok{$}\NormalTok{predicteds, }\DataTypeTok{actuals =}\NormalTok{ predicted_}\DecValTok{7}\OperatorTok{$}\NormalTok{actuals)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 18.55948
+\end{verbatim}
+
+\hypertarget{prueba-7-probando-con-acc-y-hp-en-su-estado-natural}{%
+\section{Prueba \#7: probando con acc y hp en su estado
+natural}\label{prueba-7-probando-con-acc-y-hp-en-su-estado-natural}}
+
+MSE: 17.00887
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# aplicar modelo}
+\NormalTok{linear_reg8 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(mpg }\OperatorTok{~}\StringTok{ }\NormalTok{acc }\OperatorTok{+}\StringTok{ }\NormalTok{hp, }\DataTypeTok{data =}\NormalTok{ training_set)}
+
+\CommentTok{# calcular predicciones}
+\NormalTok{results8 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(linear_reg8,  test_set)}
+\NormalTok{predicted_}\DecValTok{8}\NormalTok{ <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{actuals =}\NormalTok{ test_set}\OperatorTok{$}\NormalTok{mpg, }
+                                  \DataTypeTok{predicteds =}\NormalTok{ results8))}
+
+\CommentTok{# calculo del error}
+\KeywordTok{mse}\NormalTok{(}\DataTypeTok{preds =}\NormalTok{ predicted_}\DecValTok{8}\OperatorTok{$}\NormalTok{predicteds, }\DataTypeTok{actuals =}\NormalTok{ predicted_}\DecValTok{8}\OperatorTok{$}\NormalTok{actuals)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 17.00887
+\end{verbatim}
+
+\hypertarget{prueba-8-probando-con-acc-y-hp-con-log-en-mpg}{%
+\section{Prueba \#8: probando con acc y hp con log en
+mpg}\label{prueba-8-probando-con-acc-y-hp-con-log-en-mpg}}
+
+Aplicando log solo en la variable dependiente mpg obtengo el valor mas
+bajo con MSE de 14.24683
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# aplicar modelo}
+\NormalTok{linear_reg9 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\KeywordTok{log}\NormalTok{(mpg) }\OperatorTok{~}\StringTok{ }\NormalTok{acc }\OperatorTok{+}\StringTok{ }\NormalTok{hp, }\DataTypeTok{data =}\NormalTok{ training_set)}
+
+\CommentTok{# calcular predicciones}
+\NormalTok{results9 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(linear_reg9,  test_set)}
+\NormalTok{predicted_}\DecValTok{9}\NormalTok{ <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{actuals =}\NormalTok{ test_set}\OperatorTok{$}\NormalTok{mpg, }
+                                  \DataTypeTok{predicteds =} \KeywordTok{exp}\NormalTok{(results9)))}
+
+\CommentTok{# calculo del error}
+\KeywordTok{mse}\NormalTok{(}\DataTypeTok{preds =}\NormalTok{ predicted_}\DecValTok{9}\OperatorTok{$}\NormalTok{predicteds, }\DataTypeTok{actuals =}\NormalTok{ predicted_}\DecValTok{9}\OperatorTok{$}\NormalTok{actuals)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 14.24683
+\end{verbatim}
+
+\hypertarget{prueba-9-probando-con-disp-y-hp-con-log-en-mpg-y-hp}{%
+\section{Prueba \#9: probando con disp y hp con log en mpg y
+hp}\label{prueba-9-probando-con-disp-y-hp-con-log-en-mpg-y-hp}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# aplicar modelo}
+\NormalTok{linear_reg10 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\KeywordTok{log}\NormalTok{(mpg) }\OperatorTok{~}\StringTok{ }\NormalTok{disp }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(hp), }\DataTypeTok{data =}\NormalTok{ training_set)}
+
+\CommentTok{# calcular predicciones}
+\NormalTok{results10 <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(linear_reg10,  test_set)}
+\NormalTok{predicted_}\DecValTok{10}\NormalTok{ <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{actuals =}\NormalTok{ test_set}\OperatorTok{$}\NormalTok{mpg, }
+                                  \DataTypeTok{predicteds =} \KeywordTok{exp}\NormalTok{(results10)))}
+
+\CommentTok{# calculo del error}
+\KeywordTok{mse}\NormalTok{(}\DataTypeTok{preds =}\NormalTok{ predicted_}\DecValTok{10}\OperatorTok{$}\NormalTok{predicteds, }\DataTypeTok{actuals =}\NormalTok{ predicted_}\DecValTok{10}\OperatorTok{$}\NormalTok{actuals)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 14.48704
+\end{verbatim}
+
+\hypertarget{notas}{%
+\section{Notas:}\label{notas}}
+
+\begin{itemize}
+\item
+  solo la variable acc tiene distribucion normal, y como no la uso en mi
+  reg lineal principal, entonces ninguna de mis variables tiene dist
+  normal. Sera que eso me afecta en la prediccion?
+\item
+  Tenemos algunas variables categoricas, las debo quitar del data set?
+  las debo quitar del training y test set?
+\item
+  mi primer mse fue de 31.81724, es demasiado
+\item
+  la primera vez que corri todo lo hice sin quitar de los dataset de
+  prueba y training las variables categoricas, y entonces tenia errores,
+  por ser categoricas, entonces las quité y corri todo de nuevo.
+\item
+  Que debo hacer para bajar ese error?? se me ocurre hacerle log a las
+  columnas que estoy metiendo., o pasarlo por z-score
+\item
+  se me ocurrio hacer 6 columnas nuevas, aplicando log10 y log a las
+  columnas que ocupo. Lo que no pense fue que como hp tiene 6 valores en
+  0, entonces el log me da infinito, y eso revienta en la regresion
+  lineal, entonces no me sirve. debo quitar esos valores en 0. como los
+  quito?
+\item
+  quiere decir que debo preocuparme por los valores en 0 primero.
+\item
+  otra cosa que recomiendo es ordenar las columnas de menor a mayor para
+  ver si hay valores muy extremos, de esa manera pude ver que tenia
+  valores en infinito para hp, y que hp tiene valores en 0.
+\item
+  log 10 y log son muy parecidos, entonces me fui por log10 a las
+  columnas que me interesan
+\item
+  la regresion la hago con todas las variables en log, pero luego, paso
+  de vuelta los datos a notacion normal para que tenga mas sentido, y de
+  esa comparacion es que saco el error.
+\end{itemize}
+
+
+\end{document}

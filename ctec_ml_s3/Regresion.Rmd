@@ -1,6 +1,8 @@
 ---
 title: "Regresion"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -8,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Tarea 3.
+# Completada por: Karen Bolaños Alfaro
 # Regresión lineal
 
 Análisis del Problema
@@ -30,18 +33,47 @@ Con el fin de analizar y tratar de estimar las millas por galón de diferentes m
 - origin (origen): categórica, 3 valores posibles: 1, 2, 3.
 - model name (nombre del modelo): categórica, con 305 posibles valores.
 
+```{r}
+library(readr)
+library(GGally)
+library(caTools)
+library(lessR)
+library(visdat)
+library(dplyr)
+```
+
 # Ejercicios 
 
 1. Cargue el archivo auto-mpg_g.csv en una variable
 
 ```{r}
-# Escriba su código aqui
+autos <- read.csv('auto-mpg_g.csv')
 ```
 
-2. Utilizando Ggpairs cree un gráfico de los atributos del dataset, observe las correlaciones entre atributos
+2. Utilizando Ggpairs cree un gráfico de los atributos del dataset, observe las correlaciones entre atributos   
+
+Hagamos un ggpairs con todas las variables del dataset.   
+Para generar este grafico no se grafica la variable model.name porque supera la cardinalidad permitida de 15.   
+Como es categorica no nos aporta valor y no la vamos a graficar.   
+```{r}
+ggpairs(autos[-9], progress = F)
+```
+
+Como se puede observar, tenemos varias variables categoricas que para aplicar regresion lineal, no nos van a aportar mucho valor, por ejemplo: origin, cyl, model.year, model.name
+
+Hagamos un ggpair de nuevo pero sin esas variables categoricas: cyl, model.year, model.name y origin   
+Se observa que solo la variable acc presenta una distribucion masomenos normal.   
 
 ```{r}
-# Escriba su código aqui
+ggpairs(autos[-c(2, 7,8,9)], progress = F)
+```
+
+Un vistazo rapido a las estadisticas de las variables del set de datos.   
+
+IMPORTANTE: no tenemos valores faltantes como NA, pero los tenemos en 0 para la columna hp, hay que hacer algo con ellos
+probemos con eliminarlos a ver que pasa, si no los eliminamos o tratamos, no podemos aplicar log sobre ellos.   
+```{r}
+summary(autos)
 ```
 
 3. Separe los datos en 2 conjuntos, uno de entrenamiento y otro de pruebas. Normalmente se trabaja utilizando un 70-80% de los datos para entrenamiento y el resto para pruebas.
@@ -49,8 +81,77 @@ Con el fin de analizar y tratar de estimar las millas por galón de diferentes m
 Recuerde fijar una semilla para que el documento sea reproducible.
 
 Pista: https://www.rdocumentation.org/packages/caTools/versions/1.17.1/topics/sample.split
+
+Voy a crear un dataset nuevo basado en el anterior donde elimino las variables categoricas porque no me aportan valor y me dan problema en los calculos y voy a eliminar las filas que tienen hp en 0.   
 ```{r}
-# Escriba su código aqui
+autos_2 <- autos %>% 
+    select(mpg,disp,hp,weight,acc) %>% 
+    filter(hp > 0)
+```
+
+
+Veamos los tipos de datos y si falta alguno en el nuevo set de datos   
+- Observamos que todos los datos que tenemos son de tipo integer y que no tenemos NA.
+
+```{r}
+vis_dat(autos_2)
+
+# no tenemos valores faltantes en el training set
+sum(is.na(autos_2))
+```
+
+
+### Histograma y graficos de densidad del nuevo data set
+
+```{r}
+hist(autos_2$mpg)
+
+plot(density(autos_2$mpg), main = "Density Plot: mpg", ylab = "Frequency")
+```
+
+
+```{r}
+hist(autos_2$disp)
+plot(density(autos_2$disp), main = "Density Plot: disp", ylab = "Frequency")
+```
+
+
+```{r}
+hist(autos_2$hp)
+plot(density(autos_2$hp), main = "Density Plot: hp", ylab = "Frequency")
+```
+
+
+```{r}
+hist(autos_2$weight)
+plot(density(autos_2$weight), main = "Density Plot: weight", ylab = "Frequency")
+```
+
+
+```{r}
+hist(autos_2$acc)
+plot(density(autos_2$acc), main = "Density Plot: acc", ylab = "Frequency")
+```
+
+```{r}
+# boxplot de todo el dataframe
+boxplot(autos_2)
+
+# tenemos outliers en HP
+boxplot(autos_2$hp)
+
+# tenemos outliers en acc
+boxplot(autos_2$acc)
+```
+
+Voy a repartir el 80% de los datos al set de training y el 20% al de pruebas
+
+```{r}
+set.seed(17)
+data_split <- sample.split(autos_2, SplitRatio = 0.8)
+
+training_set = subset(autos_2, data_split == TRUE)
+test_set  = subset(autos_2, data_split == FALSE)
 ```
 
 4. Cree un modelo de regresion lineal utilizando el atributo mpg como la variable objetivo y en base a las correlaciones observadas en el gráfico del punto 2 escoja al menos dos atributos para usarlos como variables predictoras para el modelo.
@@ -59,23 +160,217 @@ Pista: https://www.rdocumentation.org/packages/lessR/versions/1.9.8/topics/reg
 
 Nota: Al crear el modelo utilice el conjunto de datos de entrenamiento definido en el punto 3.
 
+Para esta paso mis variables predictoras del modelo seran: disp y hp
+
+Aplicamos la formula con las variables predictoras en la regresion lineal.
+
 ```{r}
-# Escriba su código aqui
+# reg(mpg ~ hp + disp, data = training_set)
 ```
+
+```{r}
+scatter.smooth(x = training_set$hp, y = training_set$mpg, main = "MPG ~ HP")
+```
+
+
+```{r}
+scatter.smooth(x = training_set$disp, y = training_set$mpg, main = "MPG ~ Disp")
+```
+
+
+## Hagamos regresion lineal con el comando lm
+```{r}
+linear_reg = lm(mpg ~ hp + disp, data = training_set)
+print(linear_reg)
+```
+
+```{r}
+summary(linear_reg)
+```
+
+Hagamos ahora la prediccion del modelo
+```{r}
+predict_results <- predict(linear_reg,  test_set)
+preds_comparison <- data.frame(cbind(actuals = test_set$mpg, 
+                                  predicteds = predict_results))
+preds_comparison
+```
+
 
 5. Realice predicciones utilizando el conjunto de pruebas y evalue el resultado con la métrica MSE.
 
 Pista: https://www.rdocumentation.org/packages/mltools/versions/0.3.5/topics/mse
 ```{r}
-library(Metrics)
-# Escriba su código aqui
+#library(Metrics)
+library(mltools)
+
+# voy a predecir el error basada en mi nuevo dataframe preds_comparison
+mse(preds = preds_comparison$predicteds, actuals = preds_comparison$actuals)
 ```
 
+
+ Obtenemos un MSE de 16.66146, sin aplicar ningun tratamiendo a las variables predictoras ni a la independiente.
+ 
 6. Opcional
 
 6.a Pruebe varios modelos que utilicen diferentes variables y comparar los resultados obtenidos
 
 6.b Investigar como implementar en R las técnicas de preprocesado y normalización vistas en clase y aplicarlas a los datos antes de pasarlos al modelo.
+ 
+# Prueba 1: probando con hp y disp aplicando log natural
+El error ha bajado con respecto a la primera prueba sin aplicar log, ahora tenemos el MSE en: 15.65637
+```{r}
+linear_reg2 = lm(log(mpg) ~ log(hp) + log(disp), data = training_set)
+
+# calcular predicciones
+results2 <- predict(linear_reg2,  test_set)
+predicted_2 <- data.frame(cbind(actuals = test_set$mpg, 
+                                  predicteds = exp(results2)))
+
+# calculo del error
+mse(preds = predicted_2$predicteds, actuals = predicted_2$actuals)
+```
+
+# Prueba 2: probando con weight y acc en su estado natural
+El error ha bajado con respecto a la ultima prueba, ahora tenemos el MSE en: 15.03812
+```{r}
+# aplicar modelo
+linear_reg3 = lm(mpg ~ weight + acc, data = training_set)
+
+# calcular predicciones
+results3 <- predict(linear_reg3,  test_set)
+predicted_3 <- data.frame(cbind(actuals = test_set$mpg, 
+                                  predicteds = results3))
+
+# calculo del error
+mse(preds = predicted_3$predicteds, actuals = predicted_3$actuals)
+```
+
+
+# Prueba 3:probando con weight y acc con log
+Aumenta el MSE: 16.32081
+```{r}
+# aplicar modelo
+linear_reg4 = lm(log(mpg) ~ log(weight) + log(acc), data = training_set)
+
+# calcular predicciones
+results4 <- predict(linear_reg4,  test_set)
+predicted_4 <- data.frame(cbind(actuals = test_set$mpg, 
+                                  predicteds = exp(results4)))
+
+# calculo del error
+mse(preds = predicted_4$predicteds, actuals = predicted_4$actuals)
+```
+
+# Prueba #4: probando con disp y weight en su estado natural
+MSE: 15.50007
+```{r}
+# aplicar modelo
+linear_reg5 = lm(mpg ~ disp + weight, data = training_set)
+
+# calcular predicciones
+results5 <- predict(linear_reg5,  test_set)
+predicted_5 <- data.frame(cbind(actuals = test_set$mpg, 
+                                  predicteds = results5))
+# calculo del error
+mse(preds = predicted_5$predicteds, actuals = predicted_5$actuals)
+```
+
+# Prueba #5: probando con disp y weight con log
+El MSE ha aumentado a 16.86141
+```{r}
+# aplicar modelo
+linear_reg6 = lm(log(mpg) ~ log(disp) + log(weight), data = training_set)
+
+# calcular predicciones
+results6 <- predict(linear_reg6,  test_set)
+predicted_6 <- data.frame(cbind(actuals = test_set$mpg, 
+                                  predicteds = exp(results6)))
+
+# calculo del error
+mse(preds = predicted_6$predicteds, actuals = predicted_6$actuals)
+```
+
+# Prueba #6: probando con acc y hp con log
+MSE aumento a 18.55948
+```{r}
+# aplicar modelo
+linear_reg7 = lm(log(mpg) ~ log(acc) + log(hp), data = training_set)
+
+# calcular predicciones
+results7 <- predict(linear_reg7,  test_set)
+predicted_7 <- data.frame(cbind(actuals = test_set$mpg, 
+                                  predicteds = exp(results7)))
+
+# calculo del error
+mse(preds = predicted_7$predicteds, actuals = predicted_7$actuals)
+```
+
+
+# Prueba #7: probando con acc y hp en su estado natural
+MSE: 17.00887
+```{r}
+# aplicar modelo
+linear_reg8 = lm(mpg ~ acc + hp, data = training_set)
+
+# calcular predicciones
+results8 <- predict(linear_reg8,  test_set)
+predicted_8 <- data.frame(cbind(actuals = test_set$mpg, 
+                                  predicteds = results8))
+
+# calculo del error
+mse(preds = predicted_8$predicteds, actuals = predicted_8$actuals)
+```
+
+# Prueba #8: probando con acc y hp con log en mpg
+Aplicando log solo en la variable dependiente mpg obtengo el valor mas bajo con MSE de 14.24683
+```{r}
+# aplicar modelo
+linear_reg9 = lm(log(mpg) ~ acc + hp, data = training_set)
+
+# calcular predicciones
+results9 <- predict(linear_reg9,  test_set)
+predicted_9 <- data.frame(cbind(actuals = test_set$mpg, 
+                                  predicteds = exp(results9)))
+
+# calculo del error
+mse(preds = predicted_9$predicteds, actuals = predicted_9$actuals)
+```
+
+# Prueba #9: probando con disp y hp con log en mpg y hp
+```{r}
+# aplicar modelo
+linear_reg10 = lm(log(mpg) ~ disp + log(hp), data = training_set)
+
+# calcular predicciones
+results10 <- predict(linear_reg10,  test_set)
+predicted_10 <- data.frame(cbind(actuals = test_set$mpg, 
+                                  predicteds = exp(results10)))
+
+# calculo del error
+mse(preds = predicted_10$predicteds, actuals = predicted_10$actuals)
+```
+
+# Notas y dudas que me surgieron durante la realizacion de esta tarea:
+- solo la variable acc tiene distribucion normal, y como no la uso en mi reg lineal principal, entonces ninguna de mis variables tiene dist normal. Sera que eso me afecta en la prediccion?
+
+- Tenemos algunas variables categoricas, las debo quitar del data set? las debo quitar del training y test set?
+
+- mi primer mse fue de 31.81724, es demasiado
+
+- la primera vez que corri todo lo hice sin quitar de los dataset de prueba y training las variables categoricas, y entonces tenia errores, por ser categoricas, entonces las quité y corri todo de nuevo.
+
+- Que debo hacer para bajar ese error?? se me ocurre hacerle log a las columnas que estoy metiendo., o pasarlo por z-score
+
+- se me ocurrio hacer 6 columnas nuevas, aplicando log10 y log a las columnas que ocupo. Lo que no pense fue que como hp tiene 6 valores en 0, entonces el log me da infinito, y eso revienta en la regresion lineal, entonces no me sirve. debo quitar esos valores en 0. como los quito?
+
+- quiere decir que debo preocuparme por los valores en 0 primero. 
+
+- otra cosa que recomiendo es ordenar las columnas de menor a mayor para ver si hay valores muy extremos, de esa manera pude ver que tenia valores en infinito para hp, y que hp tiene valores en 0.
+
+- log 10 y log son muy parecidos, entonces me fui por log10 a las columnas que me interesan
+
+- la regresion la hago con todas las variables en log, pero luego, paso de vuelta los datos a notacion normal para que tenga mas sentido, y de esa comparacion es que saco el error.
 
 
 
