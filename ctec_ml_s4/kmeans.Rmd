@@ -9,96 +9,400 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Tarea 4.
 # Metodos no supervisados
+# Realizada por: Karen Bolaños Alfaro
 
 # Ejercicios 
 
-Librerias
+Librerías
 ```{r}
-library('ggplot2')
+library(tidyverse)
+library(visdat)
+library(GGally)
+library(reshape2)
+library(gridExtra)
 ```
 
-1. Desarolle el Análisis del Problema
-```{r}
-# Construya el análisis del problema
-```
+1. Desarolle el Análisis del Problema  
+
+El dataset Wholesale Customers contiene datos de clientes de un distribuidor al por mayor que muestra el gasto anual en unidades monetarias para diferentes categorías de productos.  
+
+El dataset contiene 440 observaciones y 8 atributos o columnas y no presenta valores faltantes.  
+
+**Descripción de los atributos**   
+1)	FRESH: gasto anual en productos frescos (continua);   
+2)	MILK: gasto anual en productos lácteos (continua);   
+3)	GROCERY: gasto anual en comestibles  (continua);   
+4)	FROZEN: gasto anual en productos congelados (continua)   
+5)	DETERGENTS_PAPER: gasto anual en detergentes y productos de papel (continua)   
+6)	DELICATESSEN: gasto anual en productos delicatessen (continua);   
+7)	CHANNEL: tipo de cliente que adquiere los productos- Horeca (Hotel/Restaurant/CafÃ©) or Retail channel (Nominal)   
+8)	REGION: Region: Lisnon, Oporto or Other (Nominal)   
+
+REGIÓN	        |Frecuencia   
+----------------|----------
+Lisbon	         |77  
+Oporto	        |47  
+Otras Regiones	|316  
+Total	|440  
+
+CANAL   |Frecuencia 
+--------|--------------
+Horeca	| 298  
+Retail	| 142  
+Total	  | 440  
+
 Fuente del dataset:
 https://archive.ics.uci.edu/ml/datasets/Wholesale+customers
 
+Basado en el dataset anterior realice un modelo k-means que agrupe los clientes en 5 grupos basado en el consumo de productos fresh, milk, grocery, frozen, detergent paper y delicatessen
+
 
 2. Cargue el archivo Wholesale customers data.csv en una variable
-
 ```{r}
-# Escriba su código aqui
+wholesale_customers <- read.csv("Wholesale.csv")
 ```
+
 
 3. Desarolle el Entendimiento de los Datos
-
 ```{r}
-# Escriba su código aqui
-```
+# veamos el tipo de los datos
+glimpse(wholesale_customers)
 
-4. Utilizando barplot cree un gráfico de los atributos del dataset, observe las correlaciones entre atributos
+# todos los datos son de tipo integer y no tenemos NA
+vis_dat(wholesale_customers)
 
-```{r}
-# Escriba su código aqui
-```
+# histograma para determinar qué numero corresponde a qué channel
+hist(wholesale_customers$Channel)
+# Horeca	298 --> 1
+# Retail	14 --> 2
 
-5. Explique el siguiente gráfico
+hist(wholesale_customers$Region)
+# Lisbon	77 --> 1
+# Oporto	47  --> 2
+# Other Region	316  --> 3
 
-```{r}
-#Grafico
-#bxplt <- ggplot(data = melt(Wholesale), aes(x= variable, y = value))
-#bxplt <- bxplt + geom_boxplot()
-#bxplt <- bxplt + facet_wrap(~Channel)
-#bxplt <- bxplt + coord_flip()
-#bxplt <- bxplt + labs(x = 'producto', y  = 'ventas')
-#bxplt <- bxplt + ggtitle('Ventas por producto y por canal')
-#bxplt
+summary(wholesale_customers)
 
-# Escriba su código aqui
-```
+# gráficos de densidad para ver el comportamiento de los datos
+plot(density(wholesale_customers$Fresh), main = "Density Plot: Fresh", ylab = "Frequency")
+plot(density(wholesale_customers$Milk), main = "Density Plot: Milk", ylab = "Frequency")
+plot(density(wholesale_customers$Grocery), main = "Density Plot: Grocery", ylab = "Frequency")
+plot(density(wholesale_customers$Frozen), main = "Density Plot: Frozen", ylab = "Frequency")
+plot(density(wholesale_customers$Detergents_Paper), main = "Density Plot: Detergents_Paper", ylab = "Frequency")
 
-6. Cree un modelo de agrupación K- Means
-Para agrupar a los clientes con base al consumo, vamos a utilizar solo las variables Fresh, Milk, Grocery, Frozen, Detergents_Paper y Delicassen. En este caso, vamos a intentar agrupar los clientes en 5 grupos diferentes.
+# boxplot para ver outliers en cada variable
+boxplot(wholesale_customers$Fresh, xlab = "Fresh")
+boxplot(wholesale_customers$Milk, xlab = "Milk")
+boxplot(wholesale_customers$Grocery, xlab = "Grocery")
+boxplot(wholesale_customers$Frozen, xlab = "Frozen")
+boxplot(wholesale_customers$Detergents_Paper, xlab= "Detergents_Paper")
 
-
-```{r}
-# Escriba su código aqui
-
-#5 Centroides utilizando k-means
-#modelo.agrupacion <- kmeans(Wholesale[,c(3:8)], centers = 5)
-
-#predecir utilizando el modelo para agregar una variable nueva llamada 'cluster' al conjunto de datos
-#Wholesale$cluster <- modelo.agrupacion$cluster
-
-#convertir la variable nueva a un factor
-#Wholesale$cluster <- factor(Wholesale$cluster)
-
-```
-
-6. Realice al menos 3 modelos cambiando los centroides 
-```{r}
-# Escriba su código aqui
-```
-
-7. Evaluacioón del modelo
-```{r}
-# Escriba su código aqui
-#Explicacion de los grupos generados
-#by(Wholesale, Wholesale$cluster, summary)
+# boxplot de todas las variables juntas
+# aqui podemos ver como todas las variables tienen outliers.
+boxplot(wholesale_customers[-c(1,2)],
+        xlab = "Variables",
+        ylab = "Dinero gastado",
+        options(scipen = 1),
+        las = 2)
 ```
 
 
-8. Desarolle al menos 5 conclusiones sobre los grupos realizados
-  * Ejemplo:
-    - Las principales características de cada grupo son:
-      - #### Grupo #1: (2do grupo más pequeño)
-      - Principalmente observaciones de la región 3 y el canal 1.
-      - Muy alto consumo de productos frescos.
-      - Bajo consumo de leche.
-      - Bajo consumo de comestibles.
-      - Alto consumo de alimentos congelados.
-      - Bajo consumo de detergentes.
-      - Bajo consumo de delicassen.
+Las variables Region y Channel, son variables categóricas nominales, las voy a convertir a factor.
+```{r}
+wholesale_customers$Channel = factor(wholesale_customers$Channel,
+                                     levels = c(1,2),
+                                     labels = c("Horeca", "Retail"))
+
+wholesale_customers$Region = factor(wholesale_customers$Region,
+                                     levels = c(1,2,3),
+                                     labels = c("Lisbon", "Oporto", "Other Region"))
+
+# confirmo que ahora tengo variables de tipo factor
+glimpse(wholesale_customers)
+```
+
+
+
+4. Utilizando barplot cree un gráfico de los atributos del dataset, observe las correlaciones entre atributos  
+Voy a realizar un ggpairs que puede ser más fácil para visualizar y entender los datos
+```{r}
+ggpairs(wholesale_customers[-c(1,2)], progress = F)
+```
+
+5. Explique el siguiente gráfico:  
+- Antes de este gráfico convertí a variables tipo factor las variables de Channel y de Region porque son variables categóricas nominales, al convertirlas a factor, podemos clasificar basado en sus valores.  
+
+El siguiente gráfico muestra la cantidad de ventas por producto filtrando por canal, a la izquierda vemos todas las ventas de productos por el canal Horeca, y a la derecha vemos las ventas por producto del sector Retail.
+```{r}
+bxplt <- ggplot(data = melt(data = wholesale_customers), 
+                aes(x = variable, y = value))
+bxplt <- bxplt + geom_boxplot()
+bxplt <- bxplt + facet_wrap(~Channel)
+bxplt <- bxplt + coord_flip()
+bxplt <- bxplt + labs(x = 'producto', y = 'ventas')
+bxplt <- bxplt + ggtitle('Ventas por producto y por canal')
+bxplt
+```
+
+6. Cree un modelo de agrupación K- Means  
+Para agrupar a los clientes con base al consumo, vamos a utilizar solo las variables Fresh, Milk, Grocery, Frozen, Detergents_Paper y Delicassen.   
+En este caso, vamos a intentar agrupar los clientes en 5 grupos diferentes.
+```{r}
+set.seed(24)
+
+# 5 Centroides utilizando k-means
+modelo_agrupacion <- kmeans(wholesale_customers[,c(3:8)], centers = 5)
+
+# predecir utilizando el modelo para agregar una variable nueva llamada 'cluster' al conjunto de datos
+wholesale_customers$cluster <- modelo_agrupacion$cluster
+
+# convertir la variable nueva a un factor
+wholesale_customers$cluster <- factor(wholesale_customers$cluster)
+
+plot(wholesale_customers[,c(3:8)], 
+     col = (wholesale_customers$cluster), 
+     main = "K-Means Clustering Results with 5 clusters and 6 components", 
+     pch = 20, 
+     cex = 2)
+```
+
+6. Realice al menos 3 modelos cambiando los centroides   
+a. Probando con 3 centroides
+```{r}
+set.seed(24)
+
+# 3 Centroides utilizando k-means
+modelo_agrupacion_3 <- kmeans(wholesale_customers[,c(3:8)], centers = 3)
+
+# predecir utilizando el modelo para agregar una variable nueva llamada 'cluster' al conjunto de datos
+wholesale_customers$cluster_3 <- modelo_agrupacion_3$cluster
+
+# convertir la variable nueva a un factor
+wholesale_customers$cluster_3 <- factor(wholesale_customers$cluster_3)
+
+plot(wholesale_customers[,c(3:8)], 
+     col = (wholesale_customers$cluster_3), 
+     main = "K-Means Clustering Results with 3 clusters and 6 components", 
+     pch = 20, 
+     cex = 2)
+```
+
+b. Probando con 2 centroides  
+```{r}
+set.seed(24)
+
+# 2 Centroides utilizando k-means
+modelo_agrupacion_2 <- kmeans(wholesale_customers[,c(3:8)], centers = 2)
+
+# predecir utilizando el modelo para agregar una variable nueva llamada 'cluster' al conjunto de datos
+wholesale_customers$cluster_2 <- modelo_agrupacion_2$cluster
+
+# convertir la variable nueva a un factor
+wholesale_customers$cluster_2 <- factor(wholesale_customers$cluster_2)
+
+plot(wholesale_customers[,c(3:8)], 
+     col = (wholesale_customers$cluster_2), 
+     main = "K-Means Clustering Results with 2 clusters and 6 componentss", 
+     pch = 20, 
+     cex = 2)
+```
+
+
+c. Probando con 4 centroides
+```{r}
+set.seed(24)
+
+# 4 Centroides utilizando k-means
+modelo_agrupacion_4 <- kmeans(wholesale_customers[,c(3:8)], centers = 4)
+
+# predecir utilizando el modelo para agregar una variable nueva llamada 'cluster' al conjunto de datos
+wholesale_customers$cluster_4 <- modelo_agrupacion_4$cluster
+
+# convertir la variable nueva a un factor
+wholesale_customers$cluster_4 <- factor(wholesale_customers$cluster_4)
+
+plot(wholesale_customers[,c(3:8)], 
+     col = (wholesale_customers$cluster_4), 
+     main = "K-Means Clustering Results with 4 clusters and 6 components", 
+     pch = 20, 
+     cex = 2)
+```
+
+
+7. Evaluación del modelo  
+
+Sin realizar ninguna modificación a los datos, cuando hago 5 clusters, puedo notar que 2 grupos tienen muy pocos elementos, el cluster 2 con 23 observaciones y el grupo 3 con solo 10 observaciones.  
+
+Esto se puede deber a que tengo outliers en todas las columnas, se puede probar eliminando los outliers para confirmar si obtengo una división más pareja en los grupos.
+```{r}
+by(wholesale_customers, wholesale_customers$cluster, summary)
+```
+
+
+Se prueba eliminando los outliers a ver si eso da algo más distribuido y luego se corre de nuevo el k-means sobre los datos sin outliers.  
+Los valores por los que estoy filtrando, son valores que basado en el boxplot de cada variable me parece que eliminan los outliers más lejanos al resto de datos.
+```{r}
+# al aplicar el filter se eliminan el 5% de los datos originales
+wholesale_no_outliers <- wholesale_customers %>% filter(Fresh <= 55000,
+                                                        Milk <= 30000,
+                                                        Grocery <= 40000,
+                                                        Frozen <= 20000,
+                                                        Detergents_Paper <= 15000)
+
+# elimino variables de cluster que hay en el dataset original
+wholesale_no_outliers <- wholesale_no_outliers[, c(1:8)]
+
+set.seed(24)
+
+# 5 Centroides utilizando k-means
+modelo_agrupacion_no_outliers <- kmeans(wholesale_no_outliers[,c(3:8)], centers = 5)
+
+# predecir utilizando el modelo para agregar una variable nueva llamada 'cluster' al conjunto de datos
+wholesale_no_outliers$cluster <- modelo_agrupacion_no_outliers$cluster
+
+# convertir la variable nueva a un factor
+wholesale_no_outliers$cluster <- factor(wholesale_no_outliers$cluster)
+```
+
+Comparemos dos gráficos de dispersión con los clusters antes y después de quitar los outliers.
+Como se puede observar en el segundo gráfico, los clusters se encuentran menos aglomerados y es más fácil determinar los integrantes de cada grupo.
+```{r}
+par(mfrow=c(1,2))
+plot(wholesale_customers[,c(3,4)], 
+     col = (wholesale_customers$cluster), 
+     main = "Clustering Results before deleting outliers with K=5 testing 6 components", 
+     pch = 20, 
+     cex = 2)
+
+plot(wholesale_no_outliers[,c(3,4)], 
+     col = (wholesale_no_outliers$cluster), 
+     main = "Clustering Results after deleting some outliers with K=5 testing 6 components", 
+     pch = 20, 
+     cex = 2)
+par("mfrow")
+
+by(wholesale_no_outliers, wholesale_no_outliers$cluster, summary)
+```
+
+Luego de eliminar los outliers se observa como los clusters tienen una distribución más equitativa de observaciones.
+
+8. Desarolle al menos 5 conclusiones sobre los grupos realizados  
+NOTA: Las conclusiones de esta tarea se realizan basado en el modelo el k-means aplicado luego de eliminar los outliers.(el k-means del paso anterior)  
+
+Para el siguiente gráfico se agrupó el dataset por cluster y se calculó el promedio de consumo de cada variable, para luego compararlas.
+```{r}
+clusters_df <- wholesale_no_outliers %>% 
+  group_by(cluster) %>%
+  summarise(fresh_mean = mean(Fresh), 
+            milk_mean = mean(Milk), 
+            grocery_mean = mean(Grocery),
+            frozen_mean = mean(Frozen),
+            detergents_mean = mean(Detergents_Paper),
+            delicassen_mean = mean(Delicassen)) 
+
+fresh_plt <- ggplot(clusters_df, aes(x = cluster, y = fresh_mean)) +
+  labs(fill = "Cluster") +
+  geom_bar(
+    aes(fill = clusters_df$cluster),
+    stat = "identity",
+    position = position_dodge(0.8),
+    width = 0.7)
+
+milk_plot <- ggplot(clusters_df, aes(x = cluster, y = milk_mean)) +
+  labs(fill = "Cluster") +
+  geom_bar(
+    aes(fill = clusters_df$cluster),
+    stat = "identity",
+    position = position_dodge(0.8),
+    width = 0.7)
+
+grocery_plot <- ggplot(clusters_df, aes(x = cluster, y = grocery_mean)) +
+  labs(fill = "Cluster") +
+  geom_bar(
+    aes(fill = clusters_df$cluster),
+    stat = "identity",
+    position = position_dodge(0.8),
+    width = 0.7)
+
+frozen_plot <- ggplot(clusters_df, aes(x = cluster, y = frozen_mean)) +
+  labs(fill = "Cluster") +
+  geom_bar(
+    aes(fill = clusters_df$cluster),
+    stat = "identity",
+    position = position_dodge(0.8),
+    width = 0.7)
+
+detergents_plot <- ggplot(clusters_df, aes(x = cluster, y = detergents_mean)) +
+  labs(fill = "Cluster") +
+  geom_bar(
+    aes(fill = clusters_df$cluster),
+    stat = "identity",
+    position = position_dodge(0.8),
+    width = 0.7)
+
+delicassen_plot <- ggplot(clusters_df, aes(x = cluster, y = delicassen_mean)) +
+  labs(fill = "Cluster") +
+  geom_bar(
+    aes(fill = clusters_df$cluster),
+    stat = "identity",
+    position = position_dodge(0.8),
+    width = 0.7)
+
+grid.arrange(fresh_plt,
+             milk_plot, 
+             grocery_plot, 
+             frozen_plot, 
+             detergents_plot, 
+             delicassen_plot, 
+             ncol = 2, 
+             nrow = 3)
+```
+
+
+* **Cluster 1: 83 observaciones**  
+  + La mayoría de sus observaciones son del channel Retail(59).  
+  + La mayoría pertenece a Other Region(64)  
+  + El consumo de productos frescos es el más bajo de todos los clusters.  
+  + Es el segundo cluster que más consume productos lácteos.  
+  + Es el segundo cluster que más consume comestibles(grocery)  
+  + Es el que menor cantidad de productos congelados consume
+  + Segundo lugar en la compra de detergentes y papel
+  + Alto consumo de productos tipo delicatessen
+  
+* **Cluster 2: 100 observaciones**
+  + La mayoría de observaciones son del channel Horeca y de Other regions.
+  + Segundo en el consumo de productos frescos
+  + Bajo consumo de productos lácteos
+  + Bajo consumo de comestibles(grocery)
+  + Segundo en consumo de productos congelados
+  + Muy bajo consumo de detergentes y papel
+  + Alto consumo de productos tipo delicatessen
+  
+* **Cluster 3: 37 observaciones**
+  + La mayoría de observaciones son del channel Retail y de Other regions.
+  + Bajo consumo de productos frescos
+  + El grupo que más consume productos lácteos
+  + El grupo que más consume comestibles(grocery)
+  + Bajo consumo de productos congelados
+  + El grupo que más consume detergentes y papel
+  + Alto consumo de productos tipo delicatessen
+  
+* **Cluster 4: 164 observaciones**
+  + La mayoría de observaciones son del channel Horeca y de Other regions.
+  + Muy bajo consumo de productos frescos
+  + Muy bajo consumo de productos lácteos
+  + Muy bajo consumo de comestibles(grocery)
+  + Alto consumo de productos congelados
+  + Muy bajo consumo de detergentes y papel
+  + El grupo que menos consume productos tipo delicatessen
+  
+* **Cluster 5: 34 observaciones**
+  + La mayoría de observaciones son del channel Horeca y de Other regions.
+  + Es el cluster que más consume productos frescos
+  + Bajo consumo de productos lácteos
+  + Bajo consumo de comestibles(grocery)
+  + Muy alto consumo de productos congelados
+  + Muy bajo consumo de detergentes y papel
+  + El grupo que más consume productos tipo delicatessen
 
 
