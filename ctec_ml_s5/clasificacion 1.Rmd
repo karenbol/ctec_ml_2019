@@ -8,58 +8,207 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Tarea 5.
-# Metodos supervisados
+# Elaborada por: Karen Bolaños Alfaro
+# Métodos Supervisados
 
-Librerias
+Librerías
 ```{r}
 library(caTools)
-library(rpart)
 library(randomForest)
+library(tibble)
+library(GGally)
+library(visdat)
+library(rpart)
+library(rpart.plot)
+library(ROCR)
 ```
 
 1. Desarolle el Análisis del Problema
-```{r}
+
 # Construya el análisis del problema
 
+Cree 3 modelos de tipo supervisados para predecir si un hongo es comestible o no basado en el data set agaricus-lepiota.
 
-# Este conjunto de datos incluye descripciones de muestras hipotéticas correspondientes a 23 especies de # hongos branquiales en el hongo de la familia Agaricus y Lepiota extraídas de la Guía de campo de la # # Sociedad Audubon de hongos de América del Norte (1981). Cada especie se identifica como definitivamente # comestible, definitivamente venenosa o de comestibilidad desconocida y no se recomienda. Esta última # # clase se combinó con la venenosa. La Guía establece claramente que no existe una regla simple para # # # determinar la comestibilidad de un hongo; ninguna regla como "folletos tres, que así sea" para el # roble venenoso y la hiedra.
+Este conjunto de datos incluye descripciones de muestras hipotéticas correspondientes a 23 especies de hongos branquiales en el hongo de la familia Agaricus y Lepiota extraídas de la Guía de campo de la Sociedad Audubon de hongos de América del Norte (1981).
+Cada especie se identifica como definitivamente comestible, definitivamente venenosa o de comestibilidad desconocida y no se recomienda.
+Esta última clase se combinó con la venenosa.
+La Guía establece claramente que no existe una regla simple para determinar la comestibilidad de un hongo; ninguna regla como "folletos tres, que así sea" para el roble venenoso y la hiedra.
 
-```
 Fuente del dataset:
 https://archive.ics.uci.edu/ml/machine-learning-databases/mushroom/agaricus-lepiota.data
 
 1. Cargue el archivo agaricus_lepiota.data.csv en una variable
+- EL atributo Stalk Root tiene 2480 valores faltantes representados por ?.
+Que hacer con ellos? Reemplazarlos por NA al cargar el arhivo
+```{r}
+hongos_df <- read.csv("datos/expanded", header = F, col.names = c("class", "cap_shape", "cap_surface", "cap_color", "bruises", "odor", "gill_attachment", "gill_spacing", "gill_size", "gill_color", "stalk_shape", "stalk_root", "stalk_surface_above_ring", "stalk_surface_below_ring", "stalk_color_above_ring", "stalk_color_below_ring", "veil_type", "veil_color", "ring_number", "ring_type", "spore_print_color", "population", "habitat"), na.strings = '?')
+```
+
 
 ```{r}
-# Escriba su código aqui
+# ver los tipos de datos
+glimpse(hongos_df)
 ```
 
 2. Desarolle el Entendimiento de los Datos
 
 ```{r}
-# Escriba su código aqui
+# todas las observaciones son de tipo factor
+vis_dat(hongos_df)
 ```
 
 3. Utilizando barplot cree un gráfico de los atributos del dataset, observe las correlaciones entre atributos
-
+- Barploot de cada una de las observaciones
 ```{r}
-# Escriba su código aqui
+barplot(table(hongos_df$class), main = "Class")
+barplot(table(hongos_df$cap_shape), main = "Cap Shape")
+barplot(table(hongos_df$cap_surface), main = "Cap Surface")
+barplot(table(hongos_df$cap_color), main = "Cap Color", las = 2)
+barplot(table(hongos_df$bruises), main = "Bruises / Contusiones")
+barplot(table(hongos_df$odor), main = "Odor", las = 2)
+barplot(table(hongos_df$gill_attachment), main = " Gill(Branquias) Attachment")
+barplot(table(hongos_df$gill_spacing), main = " Gill Spacing")
+barplot(table(hongos_df$gill_size), main = " Gill Size")
+barplot(table(hongos_df$gill_color), main = " Gill Color", las = 2)
+barplot(table(hongos_df$stalk_shape), main = "Stalk(Tallo) Shape")
+barplot(table(hongos_df$stalk_root, useNA = "ifany"), main = "Stalk Root")
+barplot(table(hongos_df$stalk_surface_above_ring), main = "Stalk Surface Above Ring")
+barplot(table(hongos_df$stalk_surface_below_ring), main = "Stalk Surface Below Ring")
+barplot(table(hongos_df$stalk_color_above_ring), main = "Stalk Color Above Ring", las = 2)
+barplot(table(hongos_df$stalk_color_below_ring), main = "Stalk Color Below Ring", las = 2)
+barplot(table(hongos_df$veil_type), main = "Veil Type")
+barplot(table(hongos_df$veil_color), main = "Veil Color")
+barplot(table(hongos_df$ring_number), main = "Ring Number")
+barplot(table(hongos_df$ring_type), main = "Ring Type")
+barplot(table(hongos_df$spore_print_color), main = "Spore Print Color", las = 2)
+barplot(table(hongos_df$population), main = "Population", las = 2)
+barplot(table(hongos_df$habitat), main = "Habitat", las = 2)
 ```
-
 
 4. Realice al menos 3 modelos vistos en clase
 ```{r}
-# Escriba su código aqui
+# division de los datos en training y prueba
+set.seed(1710)
+
+splt <- sample.split(hongos_df$class, SplitRatio = 0.7)
+
+hongos_entrenamiento <- hongos_df[splt,] 
+hongos_prueba <- hongos_df[!splt,]
+
+# comprobar que seguimos teniendo el mismo numero de observaciones
+nrow(hongos_entrenamiento) + nrow(hongos_prueba)
 ```
 
-5. Evaluación del modelo
+## Modelo #1: Crear el modelo de árboles de decisión
+- Hacemos el modelo con todas las variables del dataset
 ```{r}
-# Escriba su código aqui
+modelo_arbol <- rpart(class ~ ., data = hongos_entrenamiento, method =  'class')
+```
 
+Una vez creado el modelo se hacen las predicciones
+```{r}
+# predecir utilizando el conjunto de datos de prueba
+# en estas predicciones se obtiene la probabilidad
+predicciones <- predict(modelo_arbol, newdata = hongos_prueba, type = 'prob')
+
+rpart.plot(modelo_arbol,
+           shadow.col = "gray", #Agregar sombras
+           main = "Clasificación hongos \n(Arbol de decisión)\n")
+
+# aqui vemos la probabilidad en la prediccion de que un hongo sea o comestible o no
+head(predicciones)
+```
+
+Hacer una matriz de confusión para ver las predicciones, en el paso anterior se ejecutó el método predict para que nos diera la probabilidad, ahora se hace con class para que nos retorne la clase predicha
+```{r}
+predicciones <- predict(modelo_arbol, newdata = hongos_prueba, type = 'class')
+
+data <- table(hongos_prueba$class, predicciones)
+print(data)
 ```
 
 
-8. Desarolle al menos 3 conclusiones sobre las clasificaciones de los modelos
+ROC del modelo árboles de decisión
+```{r}
+prediccionesROC = prediction(c(predicciones), c(hongos_prueba[,'class']))
+as.numeric(performance(prediccionesROC, "auc")@y.values)
+
+plot(performance(prediccionesROC, "tpr", "fpr"),
+colorize = T,
+print.cutoffs.at = seq(0,1,by = 0.1),
+text.adj = c(-0.2,1.7),
+main = 'Curva ROC del modelo')
+```
+
+ El 99.6% de las predicciones fueron correctas, lo cual quiere decir que es un modelo muy bueno.
+
+## Modelo #2: Bosques Aleatorios
+- Aquí me topo con la noticia de que random forest sospecho que no admite NA.
+- Y yo tengo muchos NAs en la columna stalk_shape
+- Cómo tratarlos? Voy a probar diciéndole al modelo que los ignore
+- Hacemos el modelo con todas las variables del datasetß
+```{r}
+modelo_bosque <- randomForest(class ~ ., 
+                              na.action = na.omit,
+                              data = hongos_entrenamiento)
+```
+
+```{r}
+# realizar predicciones
+predicciones_bosque <- predict(modelo_bosque, newdata = hongos_prueba, type = 'class')
+
+# matriz de confusión
+data_bosque <- table(hongos_prueba$class, predicciones_bosque)
+print(data_bosque)
+```
+
+```{r}
+prediccionesROC = prediction(c(predicciones_bosque), c(hongos_prueba[,'class']))
+as.numeric(performance(prediccionesROC, "auc")@y.values)
+```
+
+Tenemos el acierto del 100% de los datos.
+
+## Modelo #3: Regresión Logística
+**Definición:** En estadística, la regresión logística es un tipo de análisis de regresión utilizado para predecir el resultado de una variable categórica (una variable que puede adoptar un número limitado de categorías) en función de las variables independientes o predictoras.
+
+- Con todas las variables daba error porque la columna veil_type es un factor que solo toma un valor, y para este caso, se necesitan factores que tengan como mínimo 2 valores.
+- En un inicio queria considerar todas las variables, pero me daba error de que no podía converger, entonces decidí reducir las variables incluidas a 5.
+```{r}
+modelo_reg_log = glm(class ~ cap_color + cap_surface + cap_shape + habitat,
+                     data = hongos_entrenamiento,
+                     family = binomial)
+```
+
+
+Predicciones
+```{r}
+predicciones_reg_log <- predict(modelo_reg_log, newdata = hongos_prueba, type = 'response')
+
+data_reg_log <- table(hongos_prueba$class, predicciones_reg_log >= 0.5)
+print(data_reg_log)
+```
+
+
+```{r}
+prediccionesROC = prediction(c(predicciones_reg_log), c(hongos_prueba[,'class']))
+as.numeric(performance(prediccionesROC, "auc")@y.values)
+```
+
+Exactitud del modelo
+```{r}
+print((data_reg_log[1,1] + data_reg_log[2,2]) / sum(data_reg_log) )
+```
+
+Obtenemos un modelo con exactitud del 77.17% para la combinación de variables elegidas.
+Puede mejorar este valor si se prueba con otra combinación de variables.
+
+Se predijo correctamente la clase el 84.80% de las veces.
+
+5. Desarolle al menos 3 conclusiones sobre las clasificaciones de los modelos
+- **Árboles de decisión:** con un 99.6% de predicciones asertadas el modelo es bueno y me permitió incluir todas las variables del dataset sin problema.  
+- **Bosques Aleatorios:** predijo todos los valores correctamente. Lo cual es sospechoso. No acepta NAs pero permitió usar todas las variables del dataset.
+- **Modelo Regresión Logística:** fue el más complicado de todos, porque habían variables tipo factor con un solo nivel y porque no podía converger con todas las variables del dataset. Pero con 5 variables predijo correctamente el 84.80% de las veces.
 
 
 

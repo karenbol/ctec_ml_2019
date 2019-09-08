@@ -96,7 +96,6 @@ Por último vamos a visualizar los datos del dataset con respecto a las columnas
 
 Con la función plot cree un gráfico de dispersión, asigne la columna 'price' al eje Y y la columna sqft_living al eje X
 
-<<<<<<< HEAD
 ```{r}
 plot(y = casas$price, x = casas$sqft_living, main = 'Relación entre Precio y Metros cuadrados', ylab = 'price', xlab = 'sqft_living')
 ```
@@ -114,11 +113,6 @@ log_sqrt = log10(casas$sqft_living)
 plot(y = log_price, x = log_sqrt, main = 'Log - Relación entre Precio y Metros cuadrados', ylab = 'price', xlab = 'sqft_living')
 
 plot(y = casas$price, x = casas$sqft_living, main = 'Relación entre Precio y Metros cuadrados', ylab = 'price', xlab = 'sqft_living')
-
-=======
-```{r}
-plot(y = casas$price, x = casas$sqft_living, main = 'Relación entre Precio y Metros cuadrados', ylab = 'price', xlab = 'sqft_living')
->>>>>>> Tarea 1
 ```
 
 
