@@ -146,7 +146,7 @@ main = 'Curva ROC del modelo')
 - Aquí me topo con la noticia de que random forest sospecho que no admite NA.
 - Y yo tengo muchos NAs en la columna stalk_shape
 - Cómo tratarlos? Voy a probar diciéndole al modelo que los ignore
-- Hacemos el modelo con todas las variables del datasetß
+- Hacemos el modelo con todas las variables del dataset
 ```{r}
 modelo_bosque <- randomForest(class ~ ., 
                               na.action = na.omit,

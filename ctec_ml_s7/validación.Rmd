@@ -8,62 +8,386 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Tarea 7.
-# Validación
+# Realizado por: Karen Bolaños Alfaro  
+# Validación  
 
-Librerias
+---
+title: "Clase 7"
+output: html_document
+---
+
+Librerías
 ```{r}
-#..........Librerias de los modelos
+library(caTools)
+library(rpart)
+library(visdat)
+library(tidyverse)
+library(rpart)
+library(rpart.plot)
+library(ROCR)
+library(randomForest)
+library(neuralnet)
+library(corrplot)
+library(class)
+library(e1071)
 ```
 
-1. Desarolle el An?lisis del Problema
+1. Desarrolle el Análisis del Problema  
+> Basado en las variables: Rol, edad, sexo y dia, precedir si una persona sale herida o no en un accidente de tránsito.
+
 ```{r}
-# Construya el análisis del problema
+# Los datos se obtienen mediante el parte oficial de tránsito que realiza la Dirección General de Policía de Tránsito al presentarse un accidente, los cuales ingresan a la base de datos de dos formas (hand held y papel). Debido a que parte de la labor principal de la Institución es salvar vidas, y por los recursos limitados que existen, se trabaja solo con accidentes con heridos y/o fallecidos; y no se trabaja con accidentes que presentan solo daños materiales. Además, posteriormente inicia el proceso de limpieza, corrección de inconsistencias, validación de algunas variables, georeferenciación de los accidentes, entre otros.
 
+# Accidente con víctima se refiere cuando en el accidente de tránsito al menos uno de los participantes resulto: herido leve, grave o fallecido.
 
-# Los datos se obtienen mediante el  parte oficial de tr?nsito que realiza la Direcci?n General de Polic?a de Tr?nsito al presentarse un accidente, los cuales ingresan a la base de datos de dos formas (hand held y papel). Debido a que parte de la labor principal de la Instituci?n es salvar vidas, y por los recursos limitados que existen, se trabaja solo con accidentes con heridos y/o fallecidos; y no se trabaja con accidentes que presentan solo da?os materiales. Adem?s, posteriormente inicia el proceso de limpieza, correcci?n de inconsistencias, validaci?n de algunas variables,  georeferenciaci?n de los accidentes, entre otros.
-
-
-#Accidente con v?ctima se refiere cuando en el accidente de tr?nsito al menos uno de los participantes resulto: herido leve, grave o fallecido.
-
-#Para m?s informaci?n revisar la metodolog?a del documento Memoria estad?stica de accidentes de tr?nsito con v?ctimas.Periodo 2012-2014.
-
+# Para más información revisar la metodología del documento Memoria estadística de accidentes de tránsito con víctimas.Periodo 2012-2014.
 ```
 Fuente del dataset:
 http://datosabiertos.csv.go.cr/dashboards/19683/accidentes/
 
-1. Cargue el archivo nombre.csv en una variable
-
+1. Cargue el archivo en una variable
 ```{r}
-# Escriba su c?digo aqui
+cosevi_original = read.csv("cosevi_dataset.csv", 
+                           na.strings = c('Desconocida', 'Desconocido'))
 ```
 
 2. Desarolle el Entendimiento de los Datos
-
+- Se observa que la columna A_persona tiene un único valor, lo cual no nos aporta mucho
+- La columna Edad.quincenal.1 está repetida.
+- La columna Dia.1, Mes.1 estan repetidas con un formato diferente a las de dia y mes, pero no aportan mucho
+- Las columnas arriba nombradas se van a eliminar.
 ```{r}
-# Escriba su c?digo aqui
+cosevi_dataset = cosevi_original[-c(1, 13, 14, 15)]
 ```
 
-3. Utilizando barplot cree un gr?fico de los atributos del dataset, observe las correlaciones entre atributos
-
+- Se observa que tenemos datos faltantes en la columna edad.quinquenal, sexo, Edad
+- En la columna sexo no se ven datos faltantes, pero si tiene
 ```{r}
-# Escriba su c?digo aqui
+glimpse(cosevi_dataset)
+vis_dat(cosevi_dataset, warn_large_data = F)
 ```
 
+- Aquí podemos ver como sí hay datos faltantes en la columna Sexo, aunque no se pueden ver en el gráfico porque son solo 72 datos de 158399 datos
+- Resulta que existe el metodo vis_miss, que nos permite ver cuanto porcentaje de datos tenemos faltantes.
+- Como tenemos apenas un 0.9% de datos faltantes, se podria considerar borrarlos porque son pocos en comparacion al total de datos que tenemos.
+```{r}
+vis_miss(cosevi_dataset, warn_large_data = F)
+```
+
+- Tenemos outliers? Si, en la columna Edad
+```{r}
+boxplot(cosevi_dataset$Edad)
+```
+
+3. Utilizando barplot cree un gráfico de los atributos del dataset, observe las correlaciones entre atributos
+```{r}
+ggplot_theme <- theme(
+  axis.text.x = element_text(
+    face = "bold",
+    angle = 90
+  ))
+```
+
+```{r}
+ggplot(data = cosevi_dataset, aes(x = Rol)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = Tipo.de.lesión)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = Edad)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = Sexo)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = Año)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = Mes)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = Día)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = Provincia)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = Cantón)) + geom_bar(stat = "count") + ggplot_theme
+```
 
 4. Realice al menos 5 modelos de los observados en clase
+- Dado que tenemos datos de tipo factor, voy a usar modelos de tipo supervisado para predecir basado en las variables Rol, Edad, Sexo y Dia si una persona sale herida o no en un accidenente
+- Mi dataset actual tiene variables que no voy a utilizar en la predicción, voy a dejar en mi dataset solo las que voy a utilizar.
 ```{r}
-# Escriba su c?digo aqui
+cosevi_dataset = cosevi_dataset[-c(4,6,7, 9, 10,11)]
 ```
 
-5. Evaluaci?n de los modelos
+- Tengo algunas filas con valores nulos en edad y sexo, son muy pocos, entonces mejor las elimino
 ```{r}
-# Escriba su c?digo aqui
-# Matriz de confusion y Curva ROCK
+cosevi_dataset <- na.omit(cosevi_dataset)
+```
 
+- Antes de iniciar con los modelos ocupo hacer algo muy importante, como voy a predecir si en un accidente se resulta herido o no, debo crear una columna nueva que tenga esos datos con el formato que deseo, que sería, si en el dataset actual hay heridos, ponga sí en la nueva columna, de lo contratio, muestre no.
+```{r}
+cosevi_dataset <- cosevi_dataset %>% 
+  mutate(heridos = as.factor(ifelse(Tipo.de.lesión %in% c("Ileso"), "No", "Si")))
+
+# eliminar columna de tipo de lesion porque tengo una nueva en el formato que la necesito
+cosevi_dataset = cosevi_dataset[-2]
+```
+
+- Dividir el dataset en training y test
+```{r}
+set.seed(12345)
+
+splt <- sample.split(cosevi_dataset$heridos, SplitRatio = 0.7)
+
+cosevi_entrenamiento <- cosevi_dataset[splt,] 
+cosevi_prueba <- cosevi_dataset[!splt,]
+
+# comprobar que seguimos teniendo el mismo numero de observaciones
+nrow(cosevi_entrenamiento) + nrow(cosevi_prueba)
 ```
 
 
-6. Desarolle al menos 5 conclusiones sobre las clasificaciones de los modelos basado en la evaluación
+# Metodo #1: Árboles de Decisión
+- Medicion del tiempo ejecutando todos los modelos
+```{r}
+start_time = Sys.time()
+```
 
 
+- Creación del modelo
+```{r}
+modelo_arbol <- rpart(heridos ~ ., data = cosevi_entrenamiento, method =  'class')
+```
 
+- Predicciones
+```{r}
+predicciones_arbol <- predict(modelo_arbol, newdata = cosevi_prueba, type = 'class')
+
+rpart.plot(modelo_arbol,
+           shadow.col = "gray", #Agregar sombras
+           main = "Si alguien resulta herido o no en un accidente")
+```
+
+- Matriz de Confusión
+```{r}
+table(cosevi_prueba$heridos, predicciones_arbol)
+```
+
+```{r}
+prediccionesROC = ROCR::prediction(c(predicciones_arbol), c(cosevi_prueba[,'heridos']))
+as.numeric(performance(prediccionesROC, "auc")@y.values)
+
+plot(performance(prediccionesROC, "tpr", "fpr"),
+colorize = T,
+print.cutoffs.at = seq(0,1,by = 0.1),
+text.adj = c(-0.2,1.7),
+main = 'Curva ROC del modelo')
+```
+
+# Modelo #2: Bosques Aleatorios
+```{r}
+modelo_bosque <- randomForest(heridos ~ ., 
+                              data = cosevi_entrenamiento)
+```
+
+- Predicciones y Matriz de Confusión
+```{r}
+predicciones_bosque <- predict(modelo_bosque, newdata = cosevi_prueba, type = 'class')
+
+# matriz de confusión
+table(cosevi_prueba$heridos, predicciones_bosque)
+```
+
+```{r}
+prediccionesROC = ROCR::prediction(c(predicciones_bosque), c(cosevi_prueba[,'heridos']))
+as.numeric(performance(prediccionesROC, "auc")@y.values)
+
+plot(performance(prediccionesROC, "tpr", "fpr"),
+colorize = T,
+print.cutoffs.at = seq(0,1,by = 0.1),
+text.adj = c(-0.2,1.7),
+main = 'Curva ROC del modelo')
+```
+
+# Modelo #3: Regresión Logística
+```{r}
+modelo_reg_log = glm(heridos ~ .,
+                     data = cosevi_entrenamiento,
+                     family = binomial)
+```
+
+- Predicciones y Matriz de Confusión
+```{r}
+predicciones_reg_log <- predict(modelo_reg_log, 
+                                newdata = cosevi_prueba, 
+                                type = 'response')
+
+table(cosevi_prueba$heridos, predicciones_reg_log >= 0.5)
+```
+
+```{r}
+prediccionesROC = ROCR::prediction(c(predicciones_reg_log), c(cosevi_prueba[,'heridos']))
+as.numeric(performance(prediccionesROC, "auc")@y.values)
+
+plot(performance(prediccionesROC, "tpr", "fpr"),
+colorize = T,
+print.cutoffs.at = seq(0,1,by = 0.1),
+text.adj = c(-0.2,1.7),
+main = 'Curva ROC del modelo')
+```
+
+
+# Modelo #4: Redes Neuronales
+- La red neuronal dura mucho tiempo en correr con todas las variables, entonces se selecciona una muestra del set de entrenamiento para que corra mas rápido
+```{r}
+sub_set_cosevi_entrenamiento <- cosevi_entrenamiento[1:10000,]
+```
+
+- Para la red neuronal se ocupa pasar los atributos a una tabla con datos dummies
+```{r}
+m <- model.matrix(~heridos + Rol + Edad + Sexo + Día,
+                   data = sub_set_cosevi_entrenamiento)
+```
+
+Reemplazar nombre de columnas por otros sin espacio ni tildes para que sea más fácil llamarlos
+```{r}
+colnames(m)[colnames(m) == "RolDueño de propiedad"] <- "RolDuenodePropiedad"
+colnames(m)[colnames(m) == "RolPasajero bicicleta"] <- "RolPasajeroBicicleta"
+colnames(m)[colnames(m) == "RolPasajero bus o microbús"] <- "RolPasajeroBusOMicrobus"
+colnames(m)[colnames(m) == "RolPasajero carro"] <- "RolPasajeroCarro"
+colnames(m)[colnames(m) == "RolPasajero moto"] <- "RolPasajeroMoto"
+colnames(m)[colnames(m) == "DíaJueves"] <- "DiaJueves"
+colnames(m)[colnames(m) == "DíaLunes"] <- "DiaLunes"
+colnames(m)[colnames(m) == "DíaJueves"] <- "DiaJueves"
+colnames(m)[colnames(m) == "DíaMartes"] <- "DiaMartes"
+colnames(m)[colnames(m) == "DíaMiércoles"] <- "DiaMiercoles"
+colnames(m)[colnames(m) == "DíaSábado"] <- "DiaSabado"
+colnames(m)[colnames(m) == "DíaViernes"] <- "DiaViernes"
+colnames(m)[colnames(m) == "RolPeatón"] <- "RolPeaton"
+```
+
+Verificar que los nombres de las columnas se cambiaron correctamente
+```{r}
+colnames(m)
+```
+
+Ejecutar el modelo de red neuronal
+```{r}
+red_neuronal_cosevi <- neuralnet(heridosSi ~ RolConductor + RolDuenodePropiedad + RolMotociclista +
+                                   RolOtro + RolPasajeroBicicleta + RolPasajeroBusOMicrobus + RolPasajeroCarro +
+                                   RolPasajeroMoto +  RolPeaton + Edad + SexoMujer + DiaJueves + DiaLunes + 
+                                   DiaMartes + DiaMiercoles + DiaSabado + DiaViernes, 
+                                   data = m, 
+                                   hidden = 1, 
+                                   rep = 1, 
+                                   linear.output = T)
+```
+
+```{r}
+plot(red_neuronal_cosevi,rep = "best")
+```
+
+- Evaluación del modelo
+```{r}
+mp <- model.matrix(~heridos + Rol + Edad + Sexo + Día,
+                   data = cosevi_prueba)
+
+# reemplazar nombre de columnas por otros sin espacio ni tildes
+colnames(mp)[colnames(mp) == "RolDueño de propiedad"] <- "RolDuenodePropiedad"
+colnames(mp)[colnames(mp) == "RolPasajero bicicleta"] <- "RolPasajeroBicicleta"
+colnames(mp)[colnames(mp) == "RolPasajero bus o microbús"] <- "RolPasajeroBusOMicrobus"
+colnames(mp)[colnames(mp) == "RolPasajero carro"] <- "RolPasajeroCarro"
+colnames(mp)[colnames(mp) == "RolPasajero moto"] <- "RolPasajeroMoto"
+colnames(mp)[colnames(mp) == "DíaJueves"] <- "DiaJueves"
+colnames(mp)[colnames(mp) == "DíaLunes"] <- "DiaLunes"
+colnames(mp)[colnames(mp) == "DíaJueves"] <- "DiaJueves"
+colnames(mp)[colnames(mp) == "DíaMartes"] <- "DiaMartes"
+colnames(mp)[colnames(mp) == "DíaMiércoles"] <- "DiaMiercoles"
+colnames(mp)[colnames(mp) == "DíaSábado"] <- "DiaSabado"
+colnames(mp)[colnames(mp) == "DíaViernes"] <- "DiaViernes"
+colnames(mp)[colnames(mp) == "RolPeatón"] <- "RolPeaton"
+
+predicciones_red <- neuralnet::compute(red_neuronal_cosevi, mp[,c("RolConductor", "RolDuenodePropiedad", 
+                                                                  "RolMotociclista","RolOtro", "RolPasajeroBicicleta",
+                                                                  "RolPasajeroBusOMicrobus", "RolPasajeroCarro",
+                                                                  "RolPasajeroMoto", "RolPeaton", "Edad", "SexoMujer",
+                                                                  "DiaJueves", "DiaLunes", "DiaMartes",
+                                                                  "DiaMiercoles", "DiaSabado", "DiaViernes")])
+
+# results <- data.frame(actual = mp, prediction = predicciones_red$net.result)
+# results
+
+predicciones_redClass = ifelse(predicciones_red$net.result >= 0.5,1,0)
+```
+
+- Matriz de Confusión
+```{r}
+table(cosevi_prueba$heridos, predicciones_redClass)
+```
+
+
+```{r}
+prediccionesROC = ROCR::prediction(c(predicciones_redClass), c(cosevi_prueba[,'heridos']))
+as.numeric(performance(prediccionesROC, "auc")@y.values)
+
+plot(performance(prediccionesROC, "tpr", "fpr"),
+colorize = T,
+print.cutoffs.at = seq(0,1,by = 0.1),
+text.adj = c(-0.2,1.7),
+main = 'Curva ROC del modelo')
+```
+
+# Modelo #5: KNN  
+- Apesar de múltiples intentos y transformaciones al dataset para correr este modelo no lo pude correr.
+- Da como error algo sobre NAs, aunque el dataset no tiene valores NA
+```{r}
+# cosevi_entrenamiento_5000 = cosevi_entrenamiento[1:5000,]
+# cosevi_prueba_1500 = cosevi_prueba[1:1500,]
+# 
+# cosevi_entrenamiento_5000$iheridos = as.integer(cosevi_entrenamiento_5000$heridos) 
+# cosevi_prueba_1500$iheridos = as.integer(cosevi_prueba_1500$heridos) 
+# 
+# glimpse(cosevi_entrenamiento_5000)
+# 
+# cl = cosevi_entrenamiento_5000[,5, drop = TRUE]
+# 
+# predicted_knn <- knn(cosevi_entrenamiento_5000[1:4], cosevi_prueba_1500[1:4], cosevi_entrenamiento_5000$iheridos, k = 1)
+# 
+# dim(cosevi_entrenamiento[1:4])
+# dim(cosevi_prueba)
+# dim(cosevi_entrenamiento[5])
+# class(cl)
+
+# predicted_knn <- caret::knn(m[, -c(1,2)], mp[, -c(1,2)], m[,1], k = 1)
+```
+
+# Modelo #6: SVM
+- Este modelo tambien dura mucho en correr, entonces se corre con una muestra del set de entrenamiento
+```{r}
+modelo_svm <- svm(heridos  ~ . ,
+                  data = sub_set_cosevi_entrenamiento, 
+                  kernel = 'linear',
+                  cross = 2, 
+                  scale = FALSE)
+```
+
+- Predicciones y Matriz de Confusión
+```{r}
+predicciones_svm <- predict(modelo_svm, 
+                            newdata = cosevi_prueba,  
+                            type = 'response')
+
+table(cosevi_prueba$heridos, predicciones_svm)
+```
+
+```{r}
+prediccionesROC = ROCR::prediction(c(predicciones_svm), c(cosevi_prueba[,'heridos']))
+as.numeric(performance(prediccionesROC, "auc")@y.values)
+
+plot(performance(prediccionesROC, "tpr", "fpr"),
+colorize = T,
+print.cutoffs.at = seq(0,1,by = 0.1),
+text.adj = c(-0.2,1.7),
+main = 'Curva ROC del modelo')
+```
+
+```{r}
+end_time = Sys.time()
+
+# Tiempo total de ejecucion
+end_time - start_time
+```
+6. Desarolle al menos 5 conclusiones sobre las clasificaciones de los modelos
+- Los resultados para los 5 modelos seleccionados fueron muy parecidos, la variación entre las predicciones de un modelo a otro fueron muy bajas.  
+- El modelo KNN, por el dataset tener variables categóricas no se pudo correr, apesar de modificaciones al dataset.  
+-  Los métodos Redes neuronales y SVM tardan mucho en correrse con el dataset completo, para cuestiones prácticas se corren con una muestra del dataset.  
+- En el modelo de árboles de decisión se muestra en el gráfico como solo el Rol es tomado en cuenta para las predicciones, lo que nos quiere decir que es entonces la variable mas importante de las que hay en el dataset.  
+- El modelo que mejor evaluó fue la regresión logística con un valor de 88.14%, los restantes 4 modelos evaluaron todos a 85.63%

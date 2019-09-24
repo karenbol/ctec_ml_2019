@@ -4,25 +4,277 @@ output: html_document
 ---
 
 # Tarea final
+# Realizada por: Karen Bolaños Alfaro
 
 ## Desarrolla una pregunta
 Identifica una pregunta que se pueda responder con un modelo de aprendizaje máquina supervisado utilizando los datos del sitio web http://datosabiertos.presidencia.go.cr/home.
 
-Puedes escoger datos de otras fuentes, pero tiene que ser sobre Costa y tienen que ser datos abiertos para que otra persona pueda reproducir el análisis.
+Puedes escoger datos de otras fuentes, pero tiene que ser sobre Costa Rica y tienen que ser datos abiertos para que otra persona pueda reproducir el análisis.
 
+- **Pregunta Original:** Quiero saber si con los valores de hora, tipo_ruta, rural_o_urbano, tipo_calzada, estado_del_tiempo y tipo_circulacion puedo predecir la clase de accidente. 
+
+- **Pregunta Version 2:** Intentanto utilizar la regresión logística tenía un error que decía: *prediction from a rank-deficient fit may be misleading*, no entendía el error y decidí ir agregando una por una las variables hasta llegar al error, resulta que el error era producido por la variable rural_o_urbano, con quitarla se quitaba el error, así que decidí excluirla de los parámetros que le enviaba al modelo.  
+
+También decidí modificar la pregunta porque al inicio pensaba que no podía incluir la variable tipo_accidente, pensaba que era muy obvio que la variable clase_accidente abarcaba ciertos tipos de accidentes, pero al obtener resultados no muy buenos en las primeras evaluaciones me di cuenta que la clase de accidente no abarca tipos de accidentes específicos, entonces decidí incluirla en los cálculos y creo que si mejoraron un poco los resultados.  
+
+Por ello modifo la pregunta para que sea:  
+
+> Quiero saber si con los valores de tipo_accidente, hora, tipo_ruta, tipo_calzada, estado_del_tiempo y tipo_circulacion puedo predecir la clase de accidente. 
 
 ## Prepara los datos
 Ejecuta una exploración de datos para entender bien las variables que tienes disponibles y poder decidir cómo vas a responder tu pregunta. Es posible que tengas que cambiar la pregunta ligeramente (¡o mucho!), si es el caso describe el proceso y tu razonamiento para los cambios.
 
 Al final decide por 2 métodos de aprendizaje automático que son relevantes para la preguntas que quieres hacer.
 
+- Librerías a utilizar
+```{r}
+library(tidyverse)
+library(visdat)
+library(caTools)
+library(randomForest)
+library(ROCR)
+library(e1071) #svm
+```
 
-## Desarrollo modelos
+### **Sobre el dataset:**
+- El dataset usado pertenece a COSEVI, y trata sobre accidentes en carretera reportados entre el 2013 y el 2017.  
+- En las tareas 6 y 7 se usó un dataset de COSEVI, pero este es diferente porque tiene otras variables que no tenía el dataset de las tareas pasadas.
+- Ha sido un problema buscar un dataset con información valiosa entre los datos abiertos de Costa Rica para aplicar machine learning, este dataset lo encontré luego de muchas horas de buscar y aunque pienso que no tiene información muy útil, a más no haber voy a intentar aplicar modelos sobre este.
+
+```{r}
+cosevi_original <- read.csv("datos/cosevi_tipo_accidentes.csv") 
+```
+
+
+- El dataset original cuenta con 22 variables todas ellas exepto *A_accidente* y *hora* son categóricas.
+```{r}
+glimpse(cosevi_original)
+```
+
+- El dataset tiene 22 variables, de las cuales solo voy a utilizar 7 para predecir la clase del accidente, voy a modificar el dataset para que solo contenga las variables que se van a ocupar(se obtienen 8 columnas por que como mencioné anteriormente al inicio pensaba incluir la variable *rural_o_urbano*)
+
+```{r}
+cosevi_dataset <- cosevi_original[c(2,3,7,14,15,18,19,20)]
+```
+
+- Asignar nombres más legibles a las columnas
+```{r}
+names(cosevi_dataset)[1] <- "clase_accidente"
+names(cosevi_dataset)[2] <- "tipo_accidente"
+names(cosevi_dataset)[3] <- "hora"
+names(cosevi_dataset)[4] <- "tipo_ruta"
+names(cosevi_dataset)[5] <- "rural_o_urbano"
+names(cosevi_dataset)[6] <- "tipo_de_calzada"
+names(cosevi_dataset)[7] <- "estado_del_tiempo"
+names(cosevi_dataset)[8] <- "tipo_circulacion"
+```
+
+- Veamos los tipos de datos que tenemos: todos excepto *hora* son valores categóricos
+```{r}
+glimpse(cosevi_dataset)
+```
+
+### Descripción de las variables:  
+- **clase_accidente**: si el accidente tuvo heridos graves o muertes o solo heridos leves  
+- **tipo_accidente**: si fue colisión, atropello, vuelco, objeto en la vía, etc.  
+- **hora**: hora de ocurrido el accidente (entre 0 y 23)  
+- **tipo_ruta**: tipo de ruta donde sucedió el accidente  
+- **rural_o_urbano**: si la ruta es rural o urbana  
+- **tipo_de_calzada**: tipo de calzada donde sucedió el accidente  
+- **estado_del_tiempo**: condición climática cuando sucedió el accidente
+- **tipo_circulacion**: condición en la que se produjo el accidente
+
+
+### Visualización de Tipos de Datos  
+NOTA: aunque no se listan NA algunas columnas tienen como valor "Desconocido", en este caso no los voy a tratar como NAs y los voy a dejar como parte del dataset
+```{r}
+vis_dat(cosevi_dataset)
+```
+
+
+- Visualización de cada variable
+```{r}
+ggplot_theme <- theme(
+  axis.text.x = element_text(
+    face = "bold",
+    angle = 90
+  ))
+```
+
+
+```{r}
+ggplot(data = cosevi_dataset, aes(x = clase_accidente)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = tipo_accidente)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = hora)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = tipo_ruta)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = rural_o_urbano)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = tipo_de_calzada)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = estado_del_tiempo)) + geom_bar(stat = "count") + ggplot_theme
+ggplot(data = cosevi_dataset, aes(x = tipo_circulacion)) + geom_bar(stat = "count") + ggplot_theme
+```
+
+### Observaciones luego de visualizar los datos
+- Luego visualizar los datos podemos ver cómo la variable a predecir que es *clase_accidente*, cuenta con muchos más registros de "Solo heridos leves" que de "Con muertos o graves" lo cual no es tan bueno para entrenar el algoritmo porque no tenemos una cantidad parecida de ambos tipos y esto lo que provoca es que los modelos tiendan a predecir muchos "Solo heridos leves" que "Con muertos o graves" porque no tienen tantos datos para entrenarse en la segunda categoría.
+- Se aprecia también como de las 4 categorías de *tipo_ruta* básicamente solo 2 tienen una cantidad de datos importantes
+- Con la variable *estodo_del_tiempo* hay una situación parecida como con *clase_accidente* pues la mayoría de los datos son de "buen tiempo".
+- Todo lo anterior confirma que este dataset no es de calidad para obtener buenos resultados al aplicar los modelos, porque los datos en la variable a predecir tienen solo 2 categorías y hay mucha diferencia de datos en cuanto a cantidad entre ellas.
+
+
+## Desarrollo de modelos
 Desarolla 2 modelos de aprendizaje automatizado (supervisado o no supervisado). Recuerda utilizar la metodologia CRISP-DM para implementar los modelos. Si buscas inspiración toma en cuenta que existe un repositorio de github https://github.com/SCRUG/DCC para tomar ideas sobre que modelos desarrollar con este tipo de datos.
 
 Al final compara el desempeño de los dos modelos. Si es un método no supervisado el desempeño lo puedes describir como tu capacidad de responder la pregunta con una u otra (hay menos métricas y metodologías para hacer una comparación numérica).
 
+### Modelos Elegidos
+- Para predecir el valor de la variable *clase_accidente* voy a utilizar 2 modelos de apredizaje tipo supervisado para clasificar los datos en si el accidente tuvo heridos graves o muertes o solo heridos leves. 
+- Los modelos a utilizar son: bosques aleatorios y regresión logística
+- Eligo estos porque no necesitan tanto pre-procesamiento de los datos y porque son simples y poderosos para obtener resultados.
 
+- Dividir el set de datos en entrenamiento y prueba
+```{r}
+set.seed(2209)
+
+splt <- sample.split(cosevi_dataset$clase_accidente, SplitRatio = 0.7)
+
+cosevi_entrenamiento <- cosevi_dataset[splt,] 
+cosevi_prueba <- cosevi_dataset[!splt,]
+```
+
+
+# Modelo #1: Bosques Aleatorios
+- Al inicio había decidido incluir la variable *rural_o_urbano* en los entrenamientos de los modelos, pero cuando llegué a Regresión lineal (el siguiente modelo) me dio error e inicié a probar con cual variable me daba error, y resulta que era esa variable, entonces me devolví a estar parte para quitarla a ver si obtenía mejores resultados, y obtuve un poco de mejora
+```{r}
+modelo_bosque <- randomForest(clase_accidente ~ tipo_accidente + hora + tipo_ruta + tipo_circulacion + tipo_de_calzada +                                  estado_del_tiempo + tipo_circulacion, 
+                              data = cosevi_entrenamiento)
+```
+
+- Predicciones y Matriz de Confusión
+```{r}
+predicciones_bosque <- predict(modelo_bosque, newdata = cosevi_prueba, type = 'class')
+
+# matriz de confusión
+table_random_forest <- table(cosevi_prueba$clase_accidente, predicciones_bosque)
+print(table_random_forest)
+```
+
+### Exactitud del modelo (observaciones clasificadas apropiadamente)
+```{r}
+exactitud_bosque <- (table_random_forest[1,1] + table_random_forest[2,2]) / sum(table_random_forest)
+print(exactitud_bosque)
+```
+
+### Sensibilidad: (porcentaje de positivos verdaderos)
+```{r}
+sensibilidad_bosque <- table_random_forest[1,1] / (table_random_forest[1,1] + table_random_forest[1,2])
+print(sensibilidad_bosque)
+```
+
+### Precisión (de las observaciones que el modelo determinó que eran Con muertos o graves, ¿cuántas realmente eran Con muertos o graves?)
+```{r}
+precision_bosque <- table_random_forest[1,1] / (table_random_forest[1,1] + table_random_forest[2,1] )
+print(precision_bosque)
+```
+
+### Especificidad (porcentaje de negativos verdaderos)
+```{r}
+especificidad_bosque <- table_random_forest[2,2] / (table_random_forest[1,2] + table_random_forest[2,2])
+print(especificidad_bosque)
+```
+
+### Curva ROC
+```{r}
+prediccionesROC = ROCR::prediction(c(predicciones_bosque), c(cosevi_prueba[,'clase_accidente']))
+as.numeric(performance(prediccionesROC, "auc")@y.values)
+
+plot(performance(prediccionesROC, "tpr", "fpr"),
+colorize = T,
+print.cutoffs.at = seq(0,1,by = 0.1),
+text.adj = c(-0.2,1.7),
+main = 'Curva ROC del modelo Bosques Aleatorios')
+```
+
+
+# Modelo #2: Regresión Logística
+Fue en este punto donde me di cuenta de que la variable *rural_o_urbano* me daba problemas con este modelo y que a lo mejor tenía que eliminarla (de hecho si la elimine de los parámetros)
+```{r}
+modelo_reg_log = glm(clase_accidente ~ tipo_accidente + hora + tipo_ruta + tipo_circulacion + tipo_de_calzada +                                  estado_del_tiempo + tipo_circulacion,
+                     data = cosevi_entrenamiento,
+                     family = binomial)
+```
+
+- Predicciones y Matriz de Confusión
+```{r}
+predicciones_reg_log <- predict(modelo_reg_log, 
+                                newdata = cosevi_prueba, 
+                                type = 'response')
+
+table_reg_log <- table(cosevi_prueba$clase_accidente, predicciones_reg_log >= 0.5)
+table_reg_log
+```
+
+### Exactitud del modelo (observaciones clasificadas apropiadamente)
+```{r}
+exactitud_reg_log <- (table_reg_log[1,1] + table_reg_log[2,2]) / sum(table_reg_log) 
+print(exactitud_reg_log)
+```
+
+### Sensibilidad: (porcentaje de positivos verdaderos)
+```{r}
+sensibilidad_reg_log <- table_reg_log[1,1] / (table_reg_log[1,1] + table_reg_log[1,2])
+print(sensibilidad_reg_log)
+```
+
+### Precisión (de las observaciones que el modelo determinó que eran Con muertos o graves, ¿cuántas realmente eran Con muertos o graves?)
+```{r}
+precision_reg_log <- table_reg_log[1,1] / (table_reg_log[1,1] + table_reg_log[2,1])
+print(precision_reg_log)
+```
+
+### Especificidad (porcentaje de negativos verdaderos)
+```{r}
+especificidad_reg_log <- table_reg_log[2,2] / (table_reg_log[1,2] + table_reg_log[2,2])
+print(especificidad_reg_log)
+```
+
+### Curva ROC
+```{r}
+prediccionesROC = ROCR::prediction(c(predicciones_reg_log), c(cosevi_prueba[,'clase_accidente']))
+as.numeric(performance(prediccionesROC, "auc")@y.values)
+
+plot(performance(prediccionesROC, "tpr", "fpr"),
+colorize = T,
+print.cutoffs.at = seq(0,1,by = 0.1),
+text.adj = c(-0.2,1.7),
+main = 'Curva ROC del modelo')
+```
+
+
+# Tabla Comparativa de Modelos
+```{r}
+comparacion_modelos <- matrix(c(exactitud_bosque,exactitud_reg_log,
+                                sensibilidad_bosque, sensibilidad_reg_log,
+                                precision_bosque, precision_reg_log,
+                                especificidad_bosque, especificidad_reg_log),
+                              ncol = 2,
+                              byrow = TRUE)
+colnames(comparacion_modelos) <- c("Bosques Aleatorios","Regresión Logística")
+rownames(comparacion_modelos) <- c("Exactitud","Sensibilidad","Precisión", "Especificidad")
+smoke <- as.table(comparacion_modelos)
+smoke
+```
+
+
+# Conclusiones:
+- Fue muy complicado conseguir un dataset con datos en crudo que tuvieran valor y que fueran útiles para predecir algo con machine learning, aún falta mucho en el gobierno de Costa Rica para que la calidad de los datos aumente, creo sin duda que deben exponer más datos sin procesar sumado a las estadísticas en PDF que ya exponen.
+- El dataset elegido no fue de mucha calidad y por ello los resultados no son tan buenos como podrían haber sido con otro dataset un poco más parejo o con más variables para usar en las predicciones.
+- Considero que un punto a favor del dataset fue que no necesité pre-procesar los datos porque en realidad estaban claros y limpios hasta cierto punto.
+- El modelo más sencillo de aplicar fue el de bosques aleatorios, que en un inicio funcionó con todas las 8 variables que pensaba incluir; *rural_o_urbano* incluida, fue hasta que apliqué Regresión Lineal que obtuve error y tuve que replantear la pregunta original y el modelo de bosques aleatorios que había corrido primero.
+- Comparando ambos modelos se puede determinar lo siguiente:
+  + Bosques aleatorios predijo con mejor exactitud(diferencia de decimales)
+  + Bosques aleatorios predijo con mayor sensibilidad
+  + En cuanto a precisión el mejor resultado lo dio la regresión logística
+  + Por una mínima diferencia en decimales, la mejor especificidad la tuvo bosques aleatorios.
+- Se concluye que el modelo que mejores resultados predijo fue **Bosques Aleatorios**.
 
 ### Calificación
 
